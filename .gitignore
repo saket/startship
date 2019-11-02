@@ -1,0 +1,19 @@
+# Java class files
+*.class
+
+# Generated files
+bin/
+gen/
+out/
+build/
+
+# Gradle files
+.gradle/
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# OS specific ignores
+.DS_Store
+*~
+*.swp
