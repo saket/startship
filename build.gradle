@@ -25,6 +25,7 @@ dependencies {
   implementation "com.jakewharton.fliptables:fliptables:1.0.2"
 
   testImplementation "junit:junit:4.12"
+  testImplementation "com.google.truth:truth:1.0"
 }
 
 compileKotlin {
