@@ -5,10 +5,10 @@ import nevam.nexus.FakeNexusRepository
 import nevam.nexus.StagingProfileRepository
 import org.junit.Test
 
-class AppTest {
+class NexusCommandTest {
 
   private val nexus = FakeNexusRepository
-  private val app = App(nexus)
+  private val app = NexusCommand(nexus)
 
   private fun runApp() {
     // main() catches CliktErrors. parse() does not.
