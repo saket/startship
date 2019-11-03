@@ -2,10 +2,10 @@ package nevam.nexus
 
 import com.jakewharton.fliptables.FlipTable
 import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
-import nevam.nexus.StagingProfileRepository.Type.Open
-import nevam.nexus.StagingProfileRepository.Type.Unknown
-import java.time.Instant
+import nevam.nexus.StagingProfileRepository.Status.Closed
+import nevam.nexus.StagingProfileRepository.Status.Open
+import nevam.nexus.StagingProfileRepository.Status.Transitioning
+import nevam.nexus.StagingProfileRepository.Status.Unknown
 
 data class StagingRepositoriesResponse(
   @Json(name = "data")
@@ -20,27 +20,36 @@ data class StagingProfileRepository(
   val profileName: String,
 
   @Json(name = "type")
-  val _type: String,
+  private val type: String,
+
+  @Json(name = "transitioning")
+  private val isTransitioning: Boolean,
 
   @Json(name = "updatedDate")
   val updatedDate: String
 ) {
 
-  val type: Type by lazy {
-    when(_type) {
+  val status: Status by lazy {
+    if (isTransitioning) {
+      Transitioning
+    }
+    else when (type) {
       "open" -> Open
-      else -> Unknown(_type)
+      "closed" -> Closed
+      else -> Unknown(type)
     }
   }
 
   override fun toString(): String {
-    val headers = arrayOf("Profile name", "Repository ID", "Type", "Updated at")
-    val row = arrayOf(profileName, id, _type, updatedDate)
+    val headers = arrayOf("Profile name", "Repository ID", "Status", "Updated at")
+    val row = arrayOf(profileName, id, status.displayValue, updatedDate)
     return FlipTable.of(headers, arrayOf(row))
   }
 
-  sealed class Type {
-    object Open : Type()
-    data class Unknown(val value: String): Type()
+  sealed class Status(val displayValue: String) {
+    object Open : Status("Open")
+    object Closed : Status("Closed")
+    object Transitioning : Status("Transitioning")
+    data class Unknown(val value: String) : Status("Unknown: $value")
   }
 }

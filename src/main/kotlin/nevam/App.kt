@@ -15,12 +15,11 @@ class App : CliktCommand(name = "Nevam") {
         user = readUserFromGradleProperties(),
         debugMode = debugMode
     )
-    echo("Fetching staging repositories…")
+    echo("Fetching staging repositories...")
     val staging = module.nexusRepository.stagingRepository()
     echo(staging)
 
     confirm(text = "Promote to release?", default = true, abort = true)
-
   }
 
   private fun readUserFromGradleProperties(): NexusUser {
