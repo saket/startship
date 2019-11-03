@@ -46,6 +46,14 @@ data class StagingProfileRepository(
     return FlipTable.of(headers, arrayOf(row))
   }
 
+  /**
+   * In "com.squareup.okhttp3:okhttp:4.2.1", moduleName: "okhttp" and versionName will be "4.2.1".
+   */
+  fun contentUrl(moduleName: String, versionName: String): String {
+    val groupDirectory = profileName.replace(oldChar = '.', newChar = '/')
+    return "https://oss.sonatype.org/content/repositories/$id/$groupDirectory/$moduleName/$versionName/"
+  }
+
   sealed class Status(val displayValue: String) {
     object Open : Status("Open")
     object Closed : Status("Closed")
