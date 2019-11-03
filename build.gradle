@@ -1,3 +1,10 @@
+buildscript {
+  ext.versions = [
+      retrofit: '2.6.2',
+      okHttp: '4.2.1'
+  ]
+}
+
 plugins {
   id 'org.jetbrains.kotlin.jvm' version '1.3.41'
 }
@@ -9,6 +16,13 @@ repositories {
 dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
   implementation "com.github.ajalt:clikt:2.2.0"
+  implementation "com.squareup.retrofit2:converter-jaxb:$versions.retrofit"
+  implementation "com.squareup.retrofit2:retrofit:$versions.retrofit"
+  implementation "com.squareup.retrofit2:converter-moshi:$versions.retrofit"
+  implementation "com.squareup.okhttp3:okhttp:$versions.okHttp"
+  implementation "com.squareup.okhttp3:logging-interceptor:$versions.okHttp"
+  implementation "com.squareup.moshi:moshi-kotlin:1.9.1"
+  implementation "com.jakewharton.fliptables:fliptables:1.0.2"
 }
 
 compileKotlin {
