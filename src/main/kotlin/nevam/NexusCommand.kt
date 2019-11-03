@@ -2,11 +2,9 @@ package nevam
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.output.TermUi.confirm
-import nevam.nexus.NexusRepository
-import java.io.FileInputStream
-import java.util.Properties
+import nevam.nexus.Nexus
 
-class NexusCommand(private val nexus: NexusRepository) : CliktCommand(name = "Nevam") {
+class NexusCommand(private val nexus: Nexus) : CliktCommand(name = "Nevam") {
   override fun run() {
     echo("Fetching staging repositories...")
     val staging = nexus.stagingRepository()

@@ -2,7 +2,7 @@ package nevam.nexus
 
 import com.github.ajalt.clikt.core.CliktError
 
-class RealNexusRepository(private val api: NexusApi): NexusRepository {
+class RealNexus(private val api: NexusApi): Nexus {
 
   @Throws(CliktError::class)
   override fun stagingRepository(): StagingProfileRepository {

@@ -1,6 +1,6 @@
 package nevam.nexus
 
-object FakeNexusRepository : NexusRepository {
+object FakeNexus : Nexus {
   lateinit var repository: StagingProfileRepository
   override fun stagingRepository() = repository
 }

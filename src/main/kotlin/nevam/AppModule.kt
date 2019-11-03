@@ -4,7 +4,7 @@ import com.github.ajalt.clikt.output.TermUi.echo
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import nevam.nexus.NexusModule
-import nevam.nexus.RealNexusRepository
+import nevam.nexus.RealNexus
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import okhttp3.logging.HttpLoggingInterceptor.Level
@@ -25,7 +25,7 @@ class AppModule(
       user = user
   )
 
-  val nexusRepository = RealNexusRepository(
+  val nexusRepository = RealNexus(
       api = nexusModule.nexusApi
   )
 }

@@ -1,13 +1,13 @@
 package nevam
 
 import com.google.common.truth.Truth.assertThat
-import nevam.nexus.FakeNexusRepository
+import nevam.nexus.FakeNexus
 import nevam.nexus.StagingProfileRepository
 import org.junit.Test
 
 class NexusCommandTest {
 
-  private val nexus = FakeNexusRepository
+  private val nexus = FakeNexus
   private val app = NexusCommand(nexus)
 
   private fun runApp() {

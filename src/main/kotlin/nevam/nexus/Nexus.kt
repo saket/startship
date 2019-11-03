@@ -1,6 +1,5 @@
 package nevam.nexus
 
-// TODO: rename to Nexus
-interface NexusRepository {
+interface Nexus {
   fun stagingRepository(): StagingProfileRepository
 }
