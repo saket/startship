@@ -19,8 +19,8 @@ class App : CliktCommand(name = "Nevam") {
     val staging = module.nexusRepository.stagingRepository()
     echo(staging)
 
-    val proceed = confirm(text = "Promote to release?", default = true)
-    echo("Answered: $proceed")
+    confirm(text = "Promote to release?", default = true, abort = true)
+
   }
 
   private fun readUserFromGradleProperties(): NexusUser {
