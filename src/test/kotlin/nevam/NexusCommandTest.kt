@@ -1,6 +1,7 @@
 package nevam
 
 import com.google.common.truth.Truth.assertThat
+import nevam.clikt.UserInput
 import nevam.nexus.FakeNexus
 import nevam.nexus.StagingProfileRepository
 import org.junit.Test
@@ -8,7 +9,19 @@ import org.junit.Test
 class NexusCommandTest {
 
   private val nexus = FakeNexus
-  private val app = NexusCommand(nexus)
+  private val console = FakeCliktConsole()
+  private val app = NexusCommand(
+      nexus = nexus,
+      input = UserInput(console)
+  )
+
+  private val fakeRepository = StagingProfileRepository(
+      id = "cagenicolas_1206",
+      profileName = "cage.nicolas",
+      type = "closed",
+      isTransitioning = false,
+      updatedDate = "Sometime"
+  )
 
   private fun runApp() {
     // main() catches CliktErrors. parse() does not.
@@ -16,13 +29,6 @@ class NexusCommandTest {
   }
 
   @Test fun `closing a non-open staged repository fails`() {
-    val fakeRepository = StagingProfileRepository(
-        id = "cagenicolas_1206",
-        profileName = "cage.nicolas",
-        type = "closed",
-        isTransitioning = false,
-        updatedDate = "Sometime"
-    )
     val assertError = { message: String ->
       assertThat(expectError { runApp() })
           .hasMessageThat()
@@ -30,7 +36,7 @@ class NexusCommandTest {
     }
 
     nexus.repository = fakeRepository.copy(type = "closed")
-    assertError("cannot be promoted as it's already closed")
+    assertError("cannot be closed as it's already closed")
 
     nexus.repository = fakeRepository.copy(type = "unknown_type")
     assertError("Unknown status of repository: 'unknown_type'")
@@ -40,5 +46,18 @@ class NexusCommandTest {
 
     nexus.repository = fakeRepository.copy(type = "closed", isTransitioning = true)
     assertError("is already transitioning to (probably) release")
+  }
+
+  @Test fun `selection from multiple staged repositories`() {
+    nexus.repositories = listOf(
+        fakeRepository.copy(id = "mesaket-1026", type = "open"),
+        fakeRepository.copy(id = "mesaket-1027", type = "closed")
+    )
+
+    console.userInputs["Enter a repository's number to proceed [1/2]: "] = "1"
+
+    runApp()
+
+    TODO()
   }
 }

@@ -1,5 +1,5 @@
 package nevam.nexus
 
 interface Nexus {
-  fun stagingRepository(): StagingProfileRepository
+  fun stagingRepositories(): List<StagingProfileRepository>
 }

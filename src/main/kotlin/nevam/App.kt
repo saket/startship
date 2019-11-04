@@ -1,5 +1,7 @@
 package nevam
 
+import com.github.ajalt.clikt.output.defaultCliktConsole
+import nevam.clikt.UserInput
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -8,7 +10,10 @@ fun main(args: Array<String>) {
       user = readUserFromGradleProperties(),
       debugMode = false
   )
-  NexusCommand(module.nexusRepository).main(args)
+  NexusCommand(
+      nexus = module.nexusRepository,
+      input = UserInput(defaultCliktConsole())
+  ).main(args)
 }
 
 private fun readUserFromGradleProperties(): NexusUser {

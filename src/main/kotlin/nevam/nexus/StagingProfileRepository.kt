@@ -41,12 +41,6 @@ data class StagingProfileRepository(
     }
   }
 
-  override fun toString(): String {
-    val headers = arrayOf("Profile name", "Repository ID", "Status", "Updated at")
-    val row = arrayOf(profileName, id, status.displayValue, updatedDate)
-    return FlipTable.of(headers, arrayOf(row))
-  }
-
   /**
    * In "com.squareup.okhttp3:okhttp:4.2.1", moduleName: "okhttp" and versionName will be "4.2.1".
    */
@@ -58,8 +52,8 @@ data class StagingProfileRepository(
   fun throwIfCannotBeClosed() {
     return when (status) {
       is Open -> Unit
-      is Closed -> throw CliktError("Repository $profileName cannot be promoted as it's already closed.")
-      is Transitioning -> throw CliktError("Repository $profileName is already transitioning to (probably) release.")
+      is Closed -> throw CliktError("Repository $id cannot be closed as it's already closed.")
+      is Transitioning -> throw CliktError("Repository $id is already transitioning to (probably) release.")
       is Unknown -> throw CliktError("Unknown status of repository: '$type'")
     }
   }
@@ -70,4 +64,23 @@ data class StagingProfileRepository(
     object Transitioning : Status("Transitioning")
     data class Unknown(val value: String) : Status("Unknown: $value")
   }
+}
+
+fun Collection<StagingProfileRepository>.toTableString(): String {
+  val printRowNumber = size > 1
+
+  val headers = mutableListOf("Profile name", "Repository ID", "Status", "Updated at")
+  if (printRowNumber) {
+    headers.add(0, "")
+  }
+
+  val rows = mapIndexed { index, repo ->
+    val row = mutableListOf(repo.profileName, repo.id, repo.status.displayValue, repo.updatedDate)
+    if (printRowNumber) {
+      row.add(0, "${index + 1}")
+    }
+    row.toTypedArray()
+  }
+
+  return FlipTable.of(headers.toTypedArray(), rows.toTypedArray())
 }
