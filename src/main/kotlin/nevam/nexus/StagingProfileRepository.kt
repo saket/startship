@@ -1,6 +1,5 @@
 package nevam.nexus
 
-import com.github.ajalt.clikt.core.CliktError
 import com.jakewharton.fliptables.FlipTable
 import com.squareup.moshi.Json
 import nevam.nexus.StagingProfileRepository.Status.Closed
@@ -21,13 +20,19 @@ data class StagingProfileRepository(
   val profileName: String,
 
   @Json(name = "type")
-  private val type: String,
+  val type: String,
 
   @Json(name = "transitioning")
   private val isTransitioning: Boolean,
 
   @Json(name = "updatedDate")
-  val updatedDate: String
+  val updatedDate: String,
+
+  /**
+   * ID of user's profile, which this repository belongs to.
+   */
+  @Json(name = "profileId")
+  val profileId: String
 ) {
 
   val status: Status by lazy {
@@ -47,15 +52,6 @@ data class StagingProfileRepository(
   fun contentUrl(moduleName: String, versionName: String): String {
     val groupDirectory = profileName.replace(oldChar = '.', newChar = '/')
     return "https://oss.sonatype.org/content/repositories/$id/$groupDirectory/$moduleName/$versionName/"
-  }
-
-  fun throwIfCannotBeClosed() {
-    return when (status) {
-      is Open -> Unit
-      is Closed -> throw CliktError("Repository $id cannot be closed as it's already closed.")
-      is Transitioning -> throw CliktError("Repository $id is already transitioning to (probably) release.")
-      is Unknown -> throw CliktError("Unknown status of repository: '$type'")
-    }
   }
 
   sealed class Status(val displayValue: String) {

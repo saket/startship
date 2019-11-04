@@ -10,7 +10,6 @@ import okhttp3.logging.HttpLoggingInterceptor
 import okhttp3.logging.HttpLoggingInterceptor.Level
 import okhttp3.logging.HttpLoggingInterceptor.Logger
 import retrofit2.Retrofit
-import retrofit2.Retrofit.Builder
 import retrofit2.converter.moshi.MoshiConverterFactory
 
 class AppModule(
@@ -47,8 +46,9 @@ class NetworkModule(debugMode: Boolean) {
         }
       }
 
-  val retrofitBuilder: Builder = Retrofit
+  val retrofitBuilder: Retrofit.Builder = Retrofit
       .Builder()
       .addConverterFactory(MoshiConverterFactory.create(moshi))
       .client(okHttpBuilder.build())
+      .validateEagerly(true)
 }
