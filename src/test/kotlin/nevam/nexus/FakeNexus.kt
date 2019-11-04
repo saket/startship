@@ -10,7 +10,5 @@ object FakeNexus : Nexus {
     }
   override fun stagingRepositories() = repositories
 
-  override fun close(repository: StagingProfileRepository) {
-    TODO()
-  }
+  override fun close(repository: StagingProfileRepository) = TODO()
 }

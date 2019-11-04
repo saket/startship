@@ -1,17 +1,17 @@
 package nevam.nexus
 
 import com.github.ajalt.clikt.core.CliktError
-import com.github.ajalt.clikt.output.TermUi.echo
-import nevam.nexus.CloseStagingRepositoryRequest.Data
 
 class RealNexus(private val api: NexusApi) : Nexus {
 
   @Throws(CliktError::class)
   override fun stagingRepositories(): List<StagingProfileRepository> {
     val response = api.stagingRepositories().execute()
-    // TODO: handle user auth error.
     return when {
       response.isSuccessful -> response.body()!!.repositories
+      response.code() == 401 -> throw CliktError(
+          "Nexus refused your user credentials. Check if your username and password are correct?"
+      )
       else -> throw CliktError("Failed to connect to nexus.")
     }
   }
