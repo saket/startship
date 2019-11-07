@@ -43,6 +43,8 @@ class NetworkModule(debugMode: Boolean) {
       .build()
 
   val okHttpBuilder = OkHttpClient.Builder()
+      .connectTimeout(30.seconds)
+      .readTimeout(30.seconds)
       .apply {
         if (debugMode) {
           val cliktLogger = object : Logger {
