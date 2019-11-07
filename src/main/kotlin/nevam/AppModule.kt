@@ -3,6 +3,8 @@ package nevam
 import com.github.ajalt.clikt.output.TermUi.echo
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import io.reactivex.plugins.RxJavaPlugins
+import nevam.extensions.seconds
 import nevam.nexus.NexusModule
 import nevam.nexus.RealNexus
 import okhttp3.OkHttpClient
@@ -10,12 +12,17 @@ import okhttp3.logging.HttpLoggingInterceptor
 import okhttp3.logging.HttpLoggingInterceptor.Level
 import okhttp3.logging.HttpLoggingInterceptor.Logger
 import retrofit2.Retrofit
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
 
 class AppModule(
   user: NexusUser,
   debugMode: Boolean
 ) {
+  init {
+    RxJavaPlugins.setErrorHandler { /* Ignored exceptions. */ }
+  }
+
   private val networkModule = NetworkModule(debugMode)
 
   private val nexusModule = NexusModule(
@@ -25,7 +32,8 @@ class AppModule(
   )
 
   val nexusRepository = RealNexus(
-      api = nexusModule.nexusApi
+      api = nexusModule.nexusApi,
+      debugMode = debugMode
   )
 }
 
@@ -49,6 +57,7 @@ class NetworkModule(debugMode: Boolean) {
   val retrofitBuilder: Retrofit.Builder = Retrofit
       .Builder()
       .addConverterFactory(MoshiConverterFactory.create(moshi))
+      .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
       .client(okHttpBuilder.build())
       .validateEagerly(true)
 }

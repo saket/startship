@@ -36,5 +36,5 @@ class NexusModule(
       .baseUrl(repositoryUrl)
       .client(okHttpClient)
       .build()
-      .create(NexusApi::class.java)!!
+      .create(NexusApi::class.java)
 }

@@ -2,16 +2,23 @@ package nevam
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
-import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.clikt.parameters.options.prompt
+import io.reactivex.Observable
+import io.reactivex.rxkotlin.blockingSubscribeBy
 import nevam.clikt.UserInput
+import nevam.extensions.minutes
 import nevam.nexus.Nexus
 import nevam.nexus.StagingProfileRepository
 import nevam.nexus.StagingProfileRepository.Status.Closed
 import nevam.nexus.StagingProfileRepository.Status.Open
 import nevam.nexus.StagingProfileRepository.Status.Transitioning
 import nevam.nexus.StagingProfileRepository.Status.Unknown
+import nevam.nexus.StatusCheckState.Checking
+import nevam.nexus.StatusCheckState.Done
+import nevam.nexus.StatusCheckState.GaveUp
+import nevam.nexus.StatusCheckState.RetryingIn
+import nevam.nexus.StatusCheckState.WillRetry
 import nevam.nexus.toTableString
+import kotlin.system.exitProcess
 
 class NexusCommand(
   private val nexus: Nexus,
@@ -39,9 +46,18 @@ class NexusCommand(
 
     if (selectedRepository.status is Open) {
       input.confirm(text = "Close repository ${selectedRepository.id}?", default = true, abort = true)
-      echo("\nClosing ${selectedRepository.id}...")
+      echoNewLine()
+      echo("Requesting Nexus to mark ${selectedRepository.id} as closed... ", trailingNewline = false)
       nexus.close(selectedRepository)
+      echo("done.")
 
+      // TODO: handle InterruptedIOException.
+      waitTillClosed(selectedRepository)
+          .blockingSubscribeBy(
+              onError = { echo(it, err = true); exitProcess(1) },
+              onNext = { echo("\r$it", trailingNewline = false) },
+              onComplete = { echoNewLine() }
+          )
     } else {
       echo("TODO: Release an already closed repository.")
     }
@@ -76,4 +92,21 @@ class NexusCommand(
       }
     }
   }
+
+  private fun waitTillClosed(repository: StagingProfileRepository): Observable<String> {
+    echo("Confirming with Nexus if it's closed yet.")
+
+    return nexus.pollUntilClosed(repository.id, giveUpAfter = 10.minutes)
+        .map {
+          when (it) {
+            is Checking -> "Talking to Nexus..."
+            is WillRetry -> "Nope, not done yet"
+            is RetryingIn -> "Checking again in ${it.secondsRemaining}s..."
+            is Done -> "Closed!"
+            is GaveUp -> "Gave up after ${it.after.toMinutes()} minutes. Try again later?"
+          }
+        }
+  }
+
+  private fun echoNewLine() = echo("")
 }

@@ -16,13 +16,16 @@ repositories {
 dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
   implementation "com.github.ajalt:clikt:2.2.0"
-  implementation "com.squareup.retrofit2:converter-jaxb:$versions.retrofit"
   implementation "com.squareup.retrofit2:retrofit:$versions.retrofit"
   implementation "com.squareup.retrofit2:converter-moshi:$versions.retrofit"
+  implementation "com.squareup.retrofit2:adapter-rxjava2:$versions.retrofit"
   implementation "com.squareup.okhttp3:okhttp:$versions.okHttp"
   implementation "com.squareup.okhttp3:logging-interceptor:$versions.okHttp"
   implementation "com.squareup.moshi:moshi-kotlin:1.9.1"
   implementation "com.jakewharton.fliptables:fliptables:1.0.2"
+  implementation "io.reactivex.rxjava2:rxjava:2.2.14"
+  implementation "io.reactivex.rxjava2:rxkotlin:2.4.0"
+  implementation "com.jakewharton.rx2:replaying-share-kotlin:2.2.0"
 
   testImplementation "junit:junit:4.12"
   testImplementation "com.google.truth:truth:1.0"

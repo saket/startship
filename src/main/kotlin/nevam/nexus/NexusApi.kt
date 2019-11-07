@@ -1,11 +1,14 @@
 package nevam.nexus
 
+import io.reactivex.Single
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
-import retrofit2.http.Query
+
+typealias RepositoryId = String
+typealias ProfileId = String
 
 interface NexusApi {
   @GET("/service/local/staging/profile_repositories")
@@ -13,9 +16,14 @@ interface NexusApi {
 
   @POST("/service/local/staging/profiles/{profileId}/finish")
   fun close(
-    @Path("profileId") profileId: String,
+    @Path("profileId") profileId: ProfileId,
     @Body request: CloseStagingRepositoryRequest
   ): Call<Void>
+
+  @GET("/service/local/staging/repository/{repositoryId}")
+  fun repository(
+    @Path("repositoryId") repositoryId: RepositoryId
+  ): Single<StagingProfileRepository>
 
   //@GET("/service/local/repositories/staging/content/{repositoryPath}/{versionName}")
   //fun stagingRepositoryContent(

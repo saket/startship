@@ -1,5 +1,11 @@
 package nevam
 
+import com.google.common.truth.Subject
+
+inline fun <reified T> Subject.isInstanceOf() {
+  return isInstanceOf(T::class.java)
+}
+
 fun expectError(action: () -> Unit): Throwable {
   var error: Throwable? = null
   try {

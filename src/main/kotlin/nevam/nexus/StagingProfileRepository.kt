@@ -19,6 +19,12 @@ data class StagingProfileRepository(
   @Json(name = "profileName")
   val profileName: String,
 
+  /**
+   * ID of user's profile, which this repository belongs to.
+   */
+  @Json(name = "profileId")
+  val profileId: String,
+
   @Json(name = "type")
   val type: String,
 
@@ -26,21 +32,17 @@ data class StagingProfileRepository(
   private val isTransitioning: Boolean,
 
   @Json(name = "updatedDate")
-  val updatedDate: String,
-
-  /**
-   * ID of user's profile, which this repository belongs to.
-   */
-  @Json(name = "profileId")
-  val profileId: String
+  val updatedDate: String
 ) {
+
+  companion object
 
   val status: Status by lazy {
     when {
       isTransitioning -> Transitioning
-      else -> when (type) {
-        "open" -> Open
-        "closed" -> Closed
+      else -> when {
+        type.trim().equals("open", ignoreCase = true) -> Open
+        type.trim().equals("closed", ignoreCase = true) -> Closed
         else -> Unknown(type)
       }
     }
@@ -58,7 +60,7 @@ data class StagingProfileRepository(
     object Open : Status("Open")
     object Closed : Status("Closed")
     object Transitioning : Status("Transitioning")
-    data class Unknown(val value: String) : Status("Unknown: $value")
+    data class Unknown(val value: String) : Status(value)
   }
 }
 
