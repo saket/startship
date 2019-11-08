@@ -6,6 +6,7 @@ import io.reactivex.schedulers.TestScheduler
 import nevam.FAKE
 import nevam.extensions.advanceTimeBy
 import nevam.extensions.minutes
+import nevam.extensions.second
 import nevam.extensions.seconds
 import nevam.isInstanceOf
 import nevam.nexus.StatusCheckState.Checking
@@ -19,9 +20,12 @@ class RealNexusTest {
 
   private val api = FakeNexusApi()
   private val testScheduler = TestScheduler()
+  private val config = NexusConfig.DEFAULT
+
   private val nexus = RealNexus(
       api = api,
-      debugMode = false
+      debugMode = false,
+      config = config
   )
 
   init {
@@ -32,7 +36,7 @@ class RealNexusTest {
     val repositoryId = "nicolascage"
 
     val statusValues = nexus
-        .pollUntilClosed(repositoryId, giveUpAfter = 10.minutes)
+        .pollUntilClosed(repositoryId)
         .test()
         .values()
     assertThat(statusValues.last()).isInstanceOf<Checking>()
@@ -46,7 +50,7 @@ class RealNexusTest {
     )
     assertThat(statusValues.last()).isInstanceOf<WillRetry>()
 
-    testScheduler.advanceTimeBy(5.seconds)
+    testScheduler.advanceTimeBy(config.statusCheck.initialRetryDelay)
     assertThat(statusValues).containsExactly(
         Checking,
         WillRetry,
@@ -57,7 +61,7 @@ class RealNexusTest {
         RetryingIn(secondsRemaining = 1)
     ).inOrder()
 
-    testScheduler.advanceTimeBy(9.seconds)
+    testScheduler.advanceTimeBy(config.statusCheck.initialRetryDelay + 4.seconds)
     assertThat(statusValues).containsExactly(
         Checking,
         WillRetry,
@@ -91,13 +95,13 @@ class RealNexusTest {
     )
 
     val statusValues = nexus
-        .pollUntilClosed(repositoryId, giveUpAfter = 5.minutes)
+        .pollUntilClosed(repositoryId)
         .test()
         .values()
 
     assertThat(statusValues).containsExactly(Checking, WillRetry)
 
-    testScheduler.advanceTimeBy(5.minutes)
+    testScheduler.advanceTimeBy(config.statusCheck.giveUpAfter)
     assertThat(statusValues.last()).isInstanceOf<GaveUp>()
   }
 
@@ -112,7 +116,7 @@ class RealNexusTest {
     )
 
     val statusValues = nexus
-        .pollUntilClosed(repositoryId, giveUpAfter = 10.minutes)
+        .pollUntilClosed(repositoryId)
         .test()
         .values()
 
@@ -125,7 +129,7 @@ class RealNexusTest {
             isTransitioning = false
         )
     )
-    testScheduler.advanceTimeBy(6.seconds)
+    testScheduler.advanceTimeBy(config.statusCheck.initialRetryDelay + 1.second)
     assertThat(statusValues.last()).isInstanceOf<Done>()
   }
 }

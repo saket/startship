@@ -2,7 +2,10 @@ package nevam.nexus
 
 import io.reactivex.Single
 import io.reactivex.subjects.BehaviorSubject
-import io.reactivex.subjects.PublishSubject
+import nevam.nexus.network.CloseStagingRepositoryRequest
+import nevam.nexus.network.NexusApi
+import nevam.nexus.network.ProfileId
+import nevam.nexus.network.RepositoryId
 import retrofit2.Call
 
 class FakeNexusApi : NexusApi {

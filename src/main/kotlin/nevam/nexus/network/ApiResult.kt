@@ -1,4 +1,4 @@
-package nevam.nexus
+package nevam.nexus.network
 
 sealed class ApiResult<out T : Any> {
   data class Success<T : Any>(val response: T?) : ApiResult<T>()

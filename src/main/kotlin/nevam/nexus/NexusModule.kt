@@ -2,6 +2,7 @@ package nevam.nexus
 
 import nevam.NetworkModule
 import nevam.NexusUser
+import nevam.nexus.network.NexusApi
 import okhttp3.Credentials
 import okhttp3.Interceptor
 

@@ -1,15 +1,12 @@
 package nevam.nexus
 
 import io.reactivex.Observable
-import java.time.Duration
+import nevam.nexus.network.RepositoryId
 
 interface Nexus {
   fun stagingRepositories(): List<StagingProfileRepository>
 
   fun close(repository: StagingProfileRepository)
 
-  fun pollUntilClosed(
-    repositoryId: RepositoryId,
-    giveUpAfter: Duration
-  ): Observable<StatusCheckState>
+  fun pollUntilClosed(repositoryId: RepositoryId): Observable<StatusCheckState>
 }

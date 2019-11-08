@@ -5,7 +5,6 @@ import com.github.ajalt.clikt.core.CliktError
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.blockingSubscribeBy
 import nevam.clikt.UserInput
-import nevam.extensions.minutes
 import nevam.nexus.Nexus
 import nevam.nexus.StagingProfileRepository
 import nevam.nexus.StagingProfileRepository.Status.Closed
@@ -54,7 +53,7 @@ class NexusCommand(
       // TODO: handle InterruptedIOException.
       waitTillClosed(selectedRepository)
           .blockingSubscribeBy(
-              onError = { echo(it, err = true); exitProcess(1) },
+              onError = { echo(it.message, err = true); exitProcess(1) },
               onNext = { echo("\r$it", trailingNewline = false) },
               onComplete = { echoNewLine() }
           )
@@ -94,16 +93,24 @@ class NexusCommand(
   }
 
   private fun waitTillClosed(repository: StagingProfileRepository): Observable<String> {
-    echo("Confirming with Nexus if it's closed yet.")
+    echo("Confirming with Nexus if it's closed yet...")
 
-    return nexus.pollUntilClosed(repository.id, giveUpAfter = 10.minutes)
+    return nexus.pollUntilClosed(repository.id)
+        .doAfterNext { if (it is GaveUp) exitProcess(1) }
         .map {
           when (it) {
             is Checking -> "Talking to Nexus..."
             is WillRetry -> "Nope, not done yet"
             is RetryingIn -> "Checking again in ${it.secondsRemaining}s..."
             is Done -> "Closed!"
-            is GaveUp -> "Gave up after ${it.after.toMinutes()} minutes. Try again later?"
+            is GaveUp -> {
+              val emptyLineForCoveringLastEcho = Array(100) { " " }.joinToString(separator = "")
+              """
+              |$emptyLineForCoveringLastEcho
+              |Gave up after trying for ${it.after.toMinutes()} minutes. It usually doesn't take this long, and is 
+              |probably an indication that Nexus is unavailable. Try again after some time?
+              """.trimMargin()
+            }
           }
         }
   }

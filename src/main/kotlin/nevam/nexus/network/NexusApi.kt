@@ -1,6 +1,8 @@
-package nevam.nexus
+package nevam.nexus.network
 
 import io.reactivex.Single
+import nevam.nexus.StagingProfileRepository
+import nevam.nexus.StagingRepositoriesResponse
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET

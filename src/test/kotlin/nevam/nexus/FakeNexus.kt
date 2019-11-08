@@ -1,7 +1,7 @@
 package nevam.nexus
 
 import io.reactivex.Observable
-import java.time.Duration
+import nevam.nexus.network.RepositoryId
 
 object FakeNexus : Nexus {
   var repositories = emptyList<StagingProfileRepository>()
@@ -15,8 +15,7 @@ object FakeNexus : Nexus {
   override fun close(repository: StagingProfileRepository) = TODO()
 
   override fun pollUntilClosed(
-    repositoryId: RepositoryId,
-    giveUpAfter: Duration
+    repositoryId: RepositoryId
   ): Observable<StatusCheckState> {
     TODO()
   }

@@ -1,13 +1,13 @@
-package nevam.nexus
+package nevam.nexus.network
 
 import io.reactivex.Single
-import nevam.extensions.second
+import nevam.nexus.StagingProfileRepository
+import nevam.nexus.StagingRepositoriesResponse
 import okhttp3.Request
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.util.concurrent.TimeUnit.MILLISECONDS
-import java.util.concurrent.TimeUnit.SECONDS
 
 object MockNexusApi : NexusApi {
 

@@ -14,6 +14,9 @@ val Int.minutes: Duration
 val Int.seconds: Duration
   get() = Duration.ofSeconds(toLong())
 
+val Long.seconds: Duration
+  get() = Duration.ofSeconds(this)
+
 val Int.second: Duration
   get() {
     return Duration.ofSeconds(toLong())
@@ -32,9 +35,6 @@ object Observables {
 
 fun <T> Observable<T>.delay(period: Duration) =
   delay(period.toMillis(), MILLISECONDS)!!
-
-operator fun Duration.times(times: Double) =
-  Duration.ofMillis((toMillis() * times).roundToLong())!!
 
 fun TestScheduler.advanceTimeBy(delayTime: Duration) {
   advanceTimeBy(delayTime.toMillis(), MILLISECONDS)

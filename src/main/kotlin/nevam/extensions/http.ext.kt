@@ -1,13 +1,13 @@
 package nevam.extensions
 
 import io.reactivex.Single
-import nevam.nexus.ApiResult
-import nevam.nexus.ApiResult.Failure
-import nevam.nexus.ApiResult.Failure.Type.Network
-import nevam.nexus.ApiResult.Failure.Type.Server
-import nevam.nexus.ApiResult.Failure.Type.Unknown
-import nevam.nexus.ApiResult.Failure.Type.UserAuth
-import nevam.nexus.ApiResult.Success
+import nevam.nexus.network.ApiResult
+import nevam.nexus.network.ApiResult.Failure
+import nevam.nexus.network.ApiResult.Failure.Type.Network
+import nevam.nexus.network.ApiResult.Failure.Type.Server
+import nevam.nexus.network.ApiResult.Failure.Type.Unknown
+import nevam.nexus.network.ApiResult.Failure.Type.UserAuth
+import nevam.nexus.network.ApiResult.Success
 import retrofit2.Call
 import retrofit2.HttpException
 import java.io.IOException

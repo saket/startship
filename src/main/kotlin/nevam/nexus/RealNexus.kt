@@ -3,19 +3,12 @@ package nevam.nexus
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.output.TermUi.echo
 import io.reactivex.Observable
-import io.reactivex.Single
 import nevam.extensions.Observables
 import nevam.extensions.executeAsResult
 import nevam.extensions.mapToResult
 import nevam.extensions.second
 import nevam.extensions.seconds
 import nevam.extensions.stacktraceToString
-import nevam.nexus.ApiResult.Failure
-import nevam.nexus.ApiResult.Failure.Type.Network
-import nevam.nexus.ApiResult.Failure.Type.Server
-import nevam.nexus.ApiResult.Failure.Type.UserAuth
-import nevam.nexus.ApiResult.Success
-import nevam.nexus.StagingProfileRepository.Status
 import nevam.nexus.StagingProfileRepository.Status.Closed
 import nevam.nexus.StagingProfileRepository.Status.Open
 import nevam.nexus.StagingProfileRepository.Status.Transitioning
@@ -25,11 +18,19 @@ import nevam.nexus.StatusCheckState.Done
 import nevam.nexus.StatusCheckState.GaveUp
 import nevam.nexus.StatusCheckState.RetryingIn
 import nevam.nexus.StatusCheckState.WillRetry
-import java.time.Duration
+import nevam.nexus.network.ApiResult.Failure
+import nevam.nexus.network.ApiResult.Failure.Type.Network
+import nevam.nexus.network.ApiResult.Failure.Type.Server
+import nevam.nexus.network.ApiResult.Failure.Type.UserAuth
+import nevam.nexus.network.ApiResult.Success
+import nevam.nexus.network.CloseStagingRepositoryRequest
+import nevam.nexus.network.NexusApi
+import nevam.nexus.network.RepositoryId
 
 class RealNexus(
   private val api: NexusApi,
-  private val debugMode: Boolean
+  private val debugMode: Boolean,
+  private val config: NexusConfig
 ) : Nexus {
 
   @Throws(CliktError::class)
@@ -54,13 +55,13 @@ class RealNexus(
     }
   }
 
-  override fun pollUntilClosed(repositoryId: RepositoryId, giveUpAfter: Duration): Observable<StatusCheckState> {
+  override fun pollUntilClosed(repositoryId: RepositoryId): Observable<StatusCheckState> {
     val giveUpAfterTimer = Observables
-        .timer(giveUpAfter)
+        .timer(config.statusCheck.giveUpAfter)
         .map { GaveUp(it) }
 
-    var nextRetryDelaySeconds = 5
-    val increaseDelay = { nextRetryDelaySeconds = (nextRetryDelaySeconds * 1.5).toInt() }
+    var nextRetryDelaySeconds = config.statusCheck.initialRetryDelay.seconds
+    val increaseDelay = { nextRetryDelaySeconds = (nextRetryDelaySeconds * 1.5).toLong() }
 
     return api.repository(repositoryId)
         .mapToResult()
