@@ -16,16 +16,22 @@ interface NexusApi {
   @GET("/service/local/staging/profile_repositories")
   fun stagingRepositories(): Call<StagingRepositoriesResponse>
 
+  @GET("/service/local/staging/repository/{repositoryId}")
+  fun repository(
+    @Path("repositoryId") repositoryId: RepositoryId
+  ): Single<StagingProfileRepository>
+
   @POST("/service/local/staging/profiles/{profileId}/finish")
   fun close(
     @Path("profileId") profileId: ProfileId,
     @Body request: CloseStagingRepositoryRequest
   ): Call<Void>
 
-  @GET("/service/local/staging/repository/{repositoryId}")
-  fun repository(
-    @Path("repositoryId") repositoryId: RepositoryId
-  ): Single<StagingProfileRepository>
+  @POST("/service/local/staging/profiles/{profileId}/promote")
+  fun release(
+    @Path("profileId") profileId: ProfileId,
+    @Body request: ReleaseStagingRepositoryRequest
+  ): Call<Void>
 
   //@GET("/service/local/repositories/staging/content/{repositoryPath}/{versionName}")
   //fun stagingRepositoryContent(

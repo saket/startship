@@ -9,4 +9,6 @@ interface Nexus {
   fun close(repository: StagingProfileRepository)
 
   fun pollUntilClosed(repositoryId: RepositoryId): Observable<StatusCheckState>
+
+  fun release(repository: StagingProfileRepository)
 }

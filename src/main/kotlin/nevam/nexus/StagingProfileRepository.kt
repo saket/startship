@@ -6,6 +6,8 @@ import nevam.nexus.StagingProfileRepository.Status.Closed
 import nevam.nexus.StagingProfileRepository.Status.Open
 import nevam.nexus.StagingProfileRepository.Status.Transitioning
 import nevam.nexus.StagingProfileRepository.Status.Unknown
+import nevam.nexus.network.ProfileId
+import nevam.nexus.network.RepositoryId
 
 data class StagingRepositoriesResponse(
   @Json(name = "data")
@@ -14,7 +16,7 @@ data class StagingRepositoriesResponse(
 
 data class StagingProfileRepository(
   @Json(name = "repositoryId")
-  val id: String,
+  val id: RepositoryId,
 
   @Json(name = "profileName")
   val profileName: String,
@@ -23,7 +25,7 @@ data class StagingProfileRepository(
    * ID of user's profile, which this repository belongs to.
    */
   @Json(name = "profileId")
-  val profileId: String,
+  val profileId: ProfileId,
 
   @Json(name = "type")
   val type: String,

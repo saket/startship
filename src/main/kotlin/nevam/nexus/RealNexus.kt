@@ -26,6 +26,7 @@ import nevam.nexus.network.ApiResult.Failure.Type.UserAuth
 import nevam.nexus.network.ApiResult.Success
 import nevam.nexus.network.CloseStagingRepositoryRequest
 import nevam.nexus.network.NexusApi
+import nevam.nexus.network.ReleaseStagingRepositoryRequest
 import nevam.nexus.network.RepositoryId
 
 class RealNexus(
@@ -48,7 +49,8 @@ class RealNexus(
   override fun close(repository: StagingProfileRepository) {
     val request = CloseStagingRepositoryRequest(repositoryId = repository.id)
 
-    when (val result = api.close(repository.profileId, request).executeAsResult()) {
+    return when (val result = api.close(repository.profileId, request).executeAsResult()) {
+      is Success -> Unit
       is Failure -> when (result.type) {
         UserAuth -> throw invalidCredentialsError()
         else -> throw genericApiError(result)
@@ -100,6 +102,18 @@ class RealNexus(
         .repeat()
         .mergeWith(giveUpAfterTimer)
         .takeUntil { it is Done || it is GaveUp }
+  }
+
+  override fun release(repository: StagingProfileRepository) {
+    val request = ReleaseStagingRepositoryRequest(repositoryId = repository.id)
+
+    return when (val result = api.release(repository.profileId, request).executeAsResult()) {
+      is Success -> Unit
+      is Failure -> when (result.type) {
+        UserAuth -> throw invalidCredentialsError()
+        else -> throw genericApiError(result)
+      }
+    }
   }
 
   private fun genericApiError(result: Failure): CliktError {

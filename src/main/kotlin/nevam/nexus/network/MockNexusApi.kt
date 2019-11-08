@@ -57,11 +57,11 @@ object MockNexusApi : NexusApi {
 //                  isTransitioning = false
 //              ),
               StagingProfileRepository(
-                  profileName = "me.saket",
                   id = "mesaket-1047",
                   type = "open",
                   updatedDate = "Wed Nov 06 01:28:19 UTC 2019",
                   profileId = "999",
+                  profileName = "me.saket",
                   isTransitioning = false
               )
           )
@@ -82,23 +82,30 @@ object MockNexusApi : NexusApi {
     return Single.fromCallable {
       if (retryCount++ >= 2) {
         StagingProfileRepository(
-            profileName = "me.saket",
             id = "mesaket-1042",
             type = "closed",
             updatedDate = "Wed Nov 06 00:50:51 UTC 2019",
             profileId = "999",
+            profileName = "me.saket",
             isTransitioning = false
         )
       } else {
         StagingProfileRepository(
-            profileName = "me.saket",
             id = "mesaket-1042",
             type = "open",
             updatedDate = "Wed Nov 06 00:50:51 UTC 2019",
             profileId = "999",
+            profileName = "me.saket",
             isTransitioning = true
         )
       }
     }.delay(250, MILLISECONDS)
+  }
+
+  override fun release(profileId: ProfileId, request: ReleaseStagingRepositoryRequest): Call<Void> {
+    return FakeCall {
+      Thread.sleep(500)
+      null
+    }
   }
 }

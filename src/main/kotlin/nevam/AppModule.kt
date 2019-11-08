@@ -4,7 +4,6 @@ import com.github.ajalt.clikt.output.TermUi.echo
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import io.reactivex.plugins.RxJavaPlugins
-import nevam.extensions.minutes
 import nevam.extensions.seconds
 import nevam.nexus.NexusConfig
 import nevam.nexus.NexusModule

@@ -5,11 +5,11 @@ import io.reactivex.subjects.BehaviorSubject
 import nevam.nexus.network.CloseStagingRepositoryRequest
 import nevam.nexus.network.NexusApi
 import nevam.nexus.network.ProfileId
+import nevam.nexus.network.ReleaseStagingRepositoryRequest
 import nevam.nexus.network.RepositoryId
 import retrofit2.Call
 
 class FakeNexusApi : NexusApi {
-
   override fun stagingRepositories(): Call<StagingRepositoriesResponse> {
     TODO()
   }
@@ -21,5 +21,9 @@ class FakeNexusApi : NexusApi {
   var repository = BehaviorSubject.create<StagingProfileRepository>()
   override fun repository(repositoryId: RepositoryId): Single<StagingProfileRepository> {
     return repository.firstOrError()
+  }
+
+  override fun release(profileId: ProfileId, request: ReleaseStagingRepositoryRequest): Call<Void> {
+    TODO()
   }
 }

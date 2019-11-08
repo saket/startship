@@ -14,9 +14,11 @@ object FakeNexus : Nexus {
 
   override fun close(repository: StagingProfileRepository) = TODO()
 
-  override fun pollUntilClosed(
-    repositoryId: RepositoryId
-  ): Observable<StatusCheckState> {
+  override fun pollUntilClosed(repositoryId: RepositoryId): Observable<StatusCheckState> {
+    TODO()
+  }
+
+  override fun release(repository: StagingProfileRepository) {
     TODO()
   }
 }

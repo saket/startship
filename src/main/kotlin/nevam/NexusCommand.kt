@@ -44,27 +44,9 @@ class NexusCommand(
     }
 
     if (selectedRepository.status is Open) {
-      input.confirm(text = "Close repository ${selectedRepository.id}?", default = true, abort = true)
-      echoNewLine()
-      echo("Requesting Nexus to mark ${selectedRepository.id} as closed... ", trailingNewline = false)
-      nexus.close(selectedRepository)
-      echo("done.")
-
-      // TODO: handle InterruptedIOException.
-      waitTillClosed(selectedRepository)
-          .blockingSubscribeBy(
-              onError = { echo(it.message, err = true); exitProcess(1) },
-              onNext = { echo("\r$it", trailingNewline = false) },
-              onComplete = { echoNewLine() }
-          )
-    } else {
-      echo("TODO: Release an already closed repository.")
+      close(selectedRepository)
     }
-
-    val moduleName = "nevamtest"
-    val versionName = "1.3.0"
-    val contentUrl = selectedRepository.contentUrl(moduleName, versionName)
-    echo("\nThe contents of $moduleName $versionName (${selectedRepository.id}) can be checked here: \n$contentUrl\n")
+    release(selectedRepository)
   }
 
   private fun promptUserToSelectARepository(options: List<StagingProfileRepository>): StagingProfileRepository {
@@ -115,5 +97,41 @@ class NexusCommand(
         }
   }
 
+  private fun close(repository: StagingProfileRepository) {
+    input.confirm("Close repository ${repository.id}?", default = true, abort = true)
+    echoNewLine()
+    echo("Requesting Nexus to mark ${repository.id} as closed... ", trailingNewline = false)
+    nexus.close(repository)
+    echo("done.")
+
+    waitTillClosed(repository).blockingSubscribeBy(
+        onError = { echo(it.message, err = true); exitProcess(1) },
+        // '\r' moves the cursor to the beginning of the line so
+        // that the status message can be updated on the same line.
+        onNext = { echo("\r$it", trailingNewline = false) },
+        onComplete = { echoNewLine(); echoNewLine() }
+    )
+  }
+
+  private fun release(repository: StagingProfileRepository) {
+    // TODO: get module name and version from the user or auto-read from somewhere.
+    val moduleName = "nevamtest"
+    val moduleVersion = "1.3.0"
+
+    val contentUrl = repository.contentUrl(moduleName, moduleVersion)
+    echo("The contents of $moduleName $moduleVersion (${repository.id}) can be checked here before it's closed: \n$contentUrl\n")
+    input.confirm("Proceed to release? 🚀", default = true, abort = true)
+
+    echoNewLine()
+    echo("Jumping into hyperspace... ", trailingNewline = false)
+    nexus.release(repository)
+    echo("done.")
+
+    echoNewLine()
+    echo("TODO: drop released repository in background")
+  }
+
   private fun echoNewLine() = echo("")
 }
+
+private fun Unit.exhaustive(): Any = this
