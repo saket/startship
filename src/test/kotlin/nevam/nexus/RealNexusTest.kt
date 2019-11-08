@@ -29,7 +29,7 @@ class RealNexusTest {
   )
 
   init {
-    RxJavaPlugins.setComputationSchedulerHandler { testScheduler }
+    RxJavaPlugins.setSingleSchedulerHandler { testScheduler }
   }
 
   @Test fun `poll status with gradual back-off`() {
