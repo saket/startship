@@ -27,10 +27,12 @@ class NexusCommand(
   override fun run() {
     echo("Fetching staged repositories...")
     val repositories = nexus.stagingRepositories()
-    echo(repositories.toTableString())
+    if (repositories.isNotEmpty()) {
+      echo(repositories.toTableString())
+    }
 
     val selectedRepository = when (repositories.size) {
-      0 -> throw CliktError("You don't have any staged repositories.")
+      0 -> throw CliktError("You don't have any staged repositories (╯°□°)╯︵ ┻━┻")
       1 -> repositories.single()
       else -> promptUserToSelectARepository(repositories)
     }
