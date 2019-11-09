@@ -15,7 +15,7 @@ fun main(args: Array<String>) {
       pom = Pom(
           groupId = "me.saket",
           artifactId = "nevamtest",
-          version = "1.3.2"
+          version = "1.3.4"
       )
   )
   module.nexusCommand.main(args)
