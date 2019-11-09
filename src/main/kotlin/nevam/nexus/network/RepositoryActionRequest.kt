@@ -3,7 +3,7 @@ package nevam.nexus.network
 import com.squareup.moshi.Json
 
 @Suppress("DataClassPrivateConstructor")
-data class CloseStagingRepositoryRequest private constructor(val data: Data) {
+data class RepositoryActionRequest private constructor(val data: Data) {
   constructor(repositoryId: String) : this(
       Data(repositoryId = repositoryId, description = null)
   )

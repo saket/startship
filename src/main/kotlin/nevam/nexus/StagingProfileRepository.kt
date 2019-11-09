@@ -2,6 +2,7 @@ package nevam.nexus
 
 import com.jakewharton.fliptables.FlipTable
 import com.squareup.moshi.Json
+import nevam.Pom
 import nevam.nexus.StagingProfileRepository.Status.Closed
 import nevam.nexus.StagingProfileRepository.Status.Open
 import nevam.nexus.StagingProfileRepository.Status.Transitioning
@@ -50,12 +51,8 @@ data class StagingProfileRepository(
     }
   }
 
-  /**
-   * In "com.squareup.okhttp3:okhttp:4.2.1", moduleName: "okhttp" and versionName will be "4.2.1".
-   */
-  fun contentUrl(moduleName: String, versionName: String): String {
-    val groupDirectory = profileName.replace(oldChar = '.', newChar = '/')
-    return "https://oss.sonatype.org/content/repositories/$id/$groupDirectory/$moduleName/$versionName/"
+  fun contentUrl(pom: Pom): String {
+    return "https://oss.sonatype.org/content/repositories/$id/${pom.mavenDirectory(includeVersion = true)}/"
   }
 
   sealed class Status(val displayValue: String) {

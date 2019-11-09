@@ -1,19 +1,22 @@
 package nevam
 
-import com.github.ajalt.clikt.output.defaultCliktConsole
-import nevam.clikt.UserInput
 import java.io.FileInputStream
 import java.util.Properties
 
 fun main(args: Array<String>) {
+  // TODO: get from the user or auto-read from somewhere:
+  //  1. POM
+  //  2. User credentials
   val module = AppModule(
       user = readUserFromGradleProperties(),
-      debugMode = false
+      debugMode = false,
+      pom = Pom(
+          groupId = "me.saket",
+          artifactId = "nevamtest",
+          version = "1.3.2"
+      )
   )
-  NexusCommand(
-      nexus = module.nexusRepository,
-      input = UserInput(defaultCliktConsole())
-  ).main(args)
+  module.nexusCommand.main(args)
 }
 
 private fun readUserFromGradleProperties(): NexusUser {

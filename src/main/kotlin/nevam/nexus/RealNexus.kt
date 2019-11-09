@@ -4,6 +4,7 @@ import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.output.TermUi.echo
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers.single
+import nevam.Pom
 import nevam.extensions.Observables
 import nevam.extensions.executeAsResult
 import nevam.extensions.mapToResult
@@ -24,9 +25,8 @@ import nevam.nexus.network.ApiResult.Failure.Type.Network
 import nevam.nexus.network.ApiResult.Failure.Type.Server
 import nevam.nexus.network.ApiResult.Failure.Type.UserAuth
 import nevam.nexus.network.ApiResult.Success
-import nevam.nexus.network.CloseStagingRepositoryRequest
 import nevam.nexus.network.NexusApi
-import nevam.nexus.network.ReleaseStagingRepositoryRequest
+import nevam.nexus.network.RepositoryActionRequest
 import nevam.nexus.network.RepositoryId
 
 class RealNexus(
@@ -47,7 +47,7 @@ class RealNexus(
   }
 
   override fun close(repository: StagingProfileRepository) {
-    val request = CloseStagingRepositoryRequest(repositoryId = repository.id)
+    val request = RepositoryActionRequest(repositoryId = repository.id)
 
     return when (val result = api.close(repository.profileId, request).executeAsResult()) {
       is Success -> Unit
@@ -59,14 +59,18 @@ class RealNexus(
   }
 
   override fun pollUntilClosed(repositoryId: RepositoryId): Observable<StatusCheckState> {
+    val checkConfig = config.closedStatusCheck
+
     val giveUpAfterTimer = Observables
-        .timer(config.statusCheck.giveUpAfter)
+        .timer(checkConfig.giveUpAfter)
         .map { GaveUp(it) }
 
-    var nextRetryDelaySeconds = config.statusCheck.initialRetryDelay.seconds
-    val increaseDelay = { nextRetryDelaySeconds = (nextRetryDelaySeconds * 1.5).toLong() }
+    var nextRetryDelaySeconds = checkConfig.initialRetryDelay.seconds
+    val increaseDelay = {
+      nextRetryDelaySeconds = (nextRetryDelaySeconds * checkConfig.backoffFactor).toLong()
+    }
 
-    return api.repository(repositoryId)
+    return api.stagingRepository(repositoryId)
         .subscribeOn(single())
         .mapToResult()
         .map {
@@ -105,9 +109,72 @@ class RealNexus(
   }
 
   override fun release(repository: StagingProfileRepository) {
-    val request = ReleaseStagingRepositoryRequest(repositoryId = repository.id)
+    val request = RepositoryActionRequest(repository.id)
 
     return when (val result = api.release(repository.profileId, request).executeAsResult()) {
+      is Success -> Unit
+      is Failure -> when (result.type) {
+        UserAuth -> throw invalidCredentialsError()
+        else -> throw genericApiError(result)
+      }
+    }
+  }
+
+  override fun pollUntilSyncedToMavenCentral(pom: Pom): Observable<StatusCheckState> {
+    val checkConfig = config.releasedStatusCheck
+
+    val giveUpAfterTimer = Observables
+        .timer(checkConfig.giveUpAfter)
+        .map { GaveUp(it) }
+
+    var nextRetryDelaySeconds = checkConfig.initialRetryDelay.seconds
+    val increaseDelay = {
+      nextRetryDelaySeconds = (nextRetryDelaySeconds * checkConfig.backoffFactor).toLong()
+    }
+
+    return api.mavenMetadata(pom.mavenDirectory(includeVersion = false))
+        .subscribeOn(single())
+        .mapToResult()
+        .map {
+          when (it) {
+            is Success -> {
+              when (pom.version == it.response!!.releaseVersion) {
+                true -> Done
+                else -> WillRetry
+              }
+            }
+            is Failure -> when (it.type) {
+              Network, Server -> WillRetry
+              UserAuth -> throw invalidCredentialsError()
+              else -> throw genericApiError(it)
+            }
+          }
+        }
+        .toObservable()
+        .startWith(Checking)
+        // TODO: share code with pollUntilClosed()?
+        .switchMap { status ->
+          if (status == WillRetry) {
+            Observables.interval(1.second, scheduler = single())
+                .map<StatusCheckState> { RetryingIn(nextRetryDelaySeconds - it.seconds) }
+                .startWith(WillRetry)
+                // Adding +1 to timer because a gap of 5 second means retrying on the 6th second.
+                .takeUntil(Observables.timer((nextRetryDelaySeconds + 1).seconds, single()))
+                .doOnComplete { increaseDelay() }
+
+          } else {
+            Observable.just(status)
+          }
+        }
+        .repeat()
+        .mergeWith(giveUpAfterTimer)
+        .takeUntil { it is Done || it is GaveUp }
+  }
+
+  override fun dropInBackground(repository: StagingProfileRepository) {
+    val request = RepositoryActionRequest(repository.id)
+
+    return when (val result = api.drop(repository.profileId, request).executeAsResult()) {
       is Success -> Unit
       is Failure -> when (result.type) {
         UserAuth -> throw invalidCredentialsError()

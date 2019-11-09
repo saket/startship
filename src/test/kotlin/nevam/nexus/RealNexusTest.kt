@@ -4,8 +4,8 @@ import com.google.common.truth.Truth.assertThat
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.TestScheduler
 import nevam.FAKE
+import nevam.Pom
 import nevam.extensions.advanceTimeBy
-import nevam.extensions.minutes
 import nevam.extensions.second
 import nevam.extensions.seconds
 import nevam.isInstanceOf
@@ -25,7 +25,12 @@ class RealNexusTest {
   private val nexus = RealNexus(
       api = api,
       debugMode = false,
-      config = config
+      config = config,
+      pom = Pom(
+          groupId = "me.saket",
+          artifactId = "flick",
+          version = "1.8.0"
+      )
   )
 
   init {
@@ -50,7 +55,7 @@ class RealNexusTest {
     )
     assertThat(statusValues.last()).isInstanceOf<WillRetry>()
 
-    testScheduler.advanceTimeBy(config.statusCheck.initialRetryDelay)
+    testScheduler.advanceTimeBy(config.closedStatusCheck.initialRetryDelay)
     assertThat(statusValues).containsExactly(
         Checking,
         WillRetry,
@@ -61,7 +66,7 @@ class RealNexusTest {
         RetryingIn(secondsRemaining = 1)
     ).inOrder()
 
-    testScheduler.advanceTimeBy(config.statusCheck.initialRetryDelay + 4.seconds)
+    testScheduler.advanceTimeBy(config.closedStatusCheck.initialRetryDelay + 4.seconds)
     assertThat(statusValues).containsExactly(
         Checking,
         WillRetry,
@@ -101,7 +106,7 @@ class RealNexusTest {
 
     assertThat(statusValues).containsExactly(Checking, WillRetry)
 
-    testScheduler.advanceTimeBy(config.statusCheck.giveUpAfter)
+    testScheduler.advanceTimeBy(config.closedStatusCheck.giveUpAfter)
     assertThat(statusValues.last()).isInstanceOf<GaveUp>()
   }
 
@@ -129,7 +134,7 @@ class RealNexusTest {
             isTransitioning = false
         )
     )
-    testScheduler.advanceTimeBy(config.statusCheck.initialRetryDelay + 1.second)
+    testScheduler.advanceTimeBy(config.closedStatusCheck.initialRetryDelay + 1.second)
     assertThat(statusValues.last()).isInstanceOf<Done>()
   }
 }

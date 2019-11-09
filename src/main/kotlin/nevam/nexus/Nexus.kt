@@ -1,6 +1,7 @@
 package nevam.nexus
 
 import io.reactivex.Observable
+import nevam.Pom
 import nevam.nexus.network.RepositoryId
 
 interface Nexus {
@@ -11,4 +12,8 @@ interface Nexus {
   fun pollUntilClosed(repositoryId: RepositoryId): Observable<StatusCheckState>
 
   fun release(repository: StagingProfileRepository)
+
+  fun pollUntilSyncedToMavenCentral(pom: Pom): Observable<StatusCheckState>
+
+  fun dropInBackground(repository: StagingProfileRepository)
 }

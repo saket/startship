@@ -1,5 +1,6 @@
 package nevam.extensions
 
+import io.reactivex.Completable
 import io.reactivex.Single
 import nevam.nexus.network.ApiResult
 import nevam.nexus.network.ApiResult.Failure
@@ -30,6 +31,20 @@ fun <T : Any> Call<T>.executeAsResult(): ApiResult<T> {
 
 fun <T : Any> Single<T>.mapToResult(): Single<ApiResult<T>> {
   return map<ApiResult<T>> { response -> Success(response) }
+      .onErrorReturn { e ->
+        when (e) {
+          is IOException -> Failure(e, Network)
+          is HttpException -> when {
+            e.code() == 401 -> Failure(e, UserAuth)
+            else -> Failure(e, Server)
+          }
+          else -> Failure(e, Unknown)
+        }
+      }
+}
+
+fun Completable.mapToResult(): Single<ApiResult<Nothing>> {
+  return andThen(Single.just<ApiResult<Nothing>>(Success(null)))
       .onErrorReturn { e ->
         when (e) {
           is IOException -> Failure(e, Network)

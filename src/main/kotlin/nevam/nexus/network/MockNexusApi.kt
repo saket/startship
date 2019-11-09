@@ -1,6 +1,11 @@
 package nevam.nexus.network
 
 import io.reactivex.Single
+import nevam.extensions.hours
+import nevam.extensions.minutes
+import nevam.extensions.seconds
+import nevam.nexus.NexusConfig
+import nevam.nexus.NexusConfig.StatusCheck
 import nevam.nexus.StagingProfileRepository
 import nevam.nexus.StagingRepositoriesResponse
 import okhttp3.Request
@@ -9,7 +14,20 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.util.concurrent.TimeUnit.MILLISECONDS
 
-object MockNexusApi : NexusApi {
+val MOCK_NEXUS_CONFIG = NexusConfig(
+    closedStatusCheck = StatusCheck(
+        giveUpAfter = 10.minutes,
+        initialRetryDelay = 2.seconds,
+        backoffFactor = 1.5f
+    ),
+    releasedStatusCheck = StatusCheck(
+        giveUpAfter = 2.hours,
+        initialRetryDelay = 2.seconds,
+        backoffFactor = 1.5f
+    )
+)
+
+class MockNexusApi : NexusApi {
 
   private class FakeCall<T>(val response: () -> T?) : Call<T> {
     private var executed = false
@@ -69,18 +87,17 @@ object MockNexusApi : NexusApi {
     }
   }
 
-  override fun close(profileId: ProfileId, request: CloseStagingRepositoryRequest): Call<Void> {
+  override fun close(profileId: ProfileId, request: RepositoryActionRequest): Call<Void> {
     return FakeCall {
       Thread.sleep(500)
       null
     }
   }
 
-  var retryCount = -1
-
-  override fun repository(repositoryId: RepositoryId): Single<StagingProfileRepository> {
+  var closedStatusRetryCount = -1
+  override fun stagingRepository(repositoryId: RepositoryId): Single<StagingProfileRepository> {
     return Single.fromCallable {
-      if (retryCount++ >= 2) {
+      if (closedStatusRetryCount++ >= 2) {
         StagingProfileRepository(
             id = "mesaket-1042",
             type = "closed",
@@ -102,10 +119,46 @@ object MockNexusApi : NexusApi {
     }.delay(250, MILLISECONDS)
   }
 
-  override fun release(profileId: ProfileId, request: ReleaseStagingRepositoryRequest): Call<Void> {
+  override fun release(profileId: ProfileId, request: RepositoryActionRequest): Call<Void> {
     return FakeCall {
       Thread.sleep(500)
       null
     }
+  }
+
+  override fun drop(profileId: ProfileId, request: RepositoryActionRequest): Call<Void> {
+    return FakeCall {
+      Thread.sleep(500)
+      null
+    }
+  }
+
+  var releasedStatusRetryCount = -1
+  override fun mavenMetadata(repositoryPath: String): Single<MavenMetadata> {
+    return Single.fromCallable {
+      if (releasedStatusRetryCount++ >= 2) {
+        MavenMetadata(
+            MavenMetadata.Data(
+                groupId = "me.saket",
+                artifactId = "nevamtest",
+                versions = MavenMetadata.Versions(
+                    release = "1.3.1",
+                    lastUpdatedDate = "20191108065802"
+                )
+            )
+        )
+      } else {
+        MavenMetadata(
+            MavenMetadata.Data(
+                groupId = "me.saket",
+                artifactId = "nevamtest",
+                versions = MavenMetadata.Versions(
+                    release = "1.3.0",
+                    lastUpdatedDate = "20191108065802"
+                )
+            )
+        )
+      }
+    }.delay(250, MILLISECONDS)
   }
 }

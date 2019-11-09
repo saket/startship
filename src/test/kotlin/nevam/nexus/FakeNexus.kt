@@ -1,6 +1,7 @@
 package nevam.nexus
 
 import io.reactivex.Observable
+import nevam.Pom
 import nevam.nexus.network.RepositoryId
 
 object FakeNexus : Nexus {
@@ -19,6 +20,14 @@ object FakeNexus : Nexus {
   }
 
   override fun release(repository: StagingProfileRepository) {
+    TODO()
+  }
+
+  override fun dropInBackground(repository: StagingProfileRepository) {
+    TODO()
+  }
+
+  override fun pollUntilSyncedToMavenCentral(pom: Pom): Observable<StatusCheckState> {
     TODO()
   }
 }

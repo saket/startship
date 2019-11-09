@@ -13,7 +13,12 @@ class NexusCommandTest {
   private val console = FakeCliktConsole()
   private val app = NexusCommand(
       nexus = nexus,
-      input = UserInput(console)
+      input = UserInput(console),
+      pom = Pom(
+          groupId = "cage.nicolas",
+          artifactId = "ghostrider",
+          version = "1.0.0"
+      )
   )
 
   private val fakeRepository = StagingProfileRepository.FAKE

@@ -11,6 +11,12 @@ import kotlin.math.roundToLong
 val Int.minutes: Duration
   get() = Duration.ofMinutes(toLong())
 
+val Int.hours: Duration
+  get() = Duration.ofHours(toLong())
+
+val Int.hour: Duration
+  get() = Duration.ofHours(toLong())
+
 val Int.seconds: Duration
   get() = Duration.ofSeconds(toLong())
 
@@ -18,9 +24,7 @@ val Long.seconds: Duration
   get() = Duration.ofSeconds(this)
 
 val Int.second: Duration
-  get() {
-    return Duration.ofSeconds(toLong())
-  }
+  get() = Duration.ofSeconds(toLong())
 
 object Observables {
   fun timer(delay: Duration, scheduler: Scheduler = Schedulers.computation()) =
