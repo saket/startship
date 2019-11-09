@@ -13,6 +13,7 @@ import nevam.extensions.seconds
 import nevam.extensions.stacktraceToString
 import nevam.nexus.StagingProfileRepository.Status.Closed
 import nevam.nexus.StagingProfileRepository.Status.Open
+import nevam.nexus.StagingProfileRepository.Status.Released
 import nevam.nexus.StagingProfileRepository.Status.Transitioning
 import nevam.nexus.StagingProfileRepository.Status.Unknown
 import nevam.nexus.StatusCheckState.Checking
@@ -79,6 +80,7 @@ class RealNexus(
               is Closed -> Done
               is Transitioning -> WillRetry
               is Open -> throw CliktError("Repository is still open! :/")
+              is Released -> throw CliktError("Repository is already released!")
               is Unknown -> throw CliktError("Received an unexpected status: ${status.displayValue}")
             }
             is Failure -> when (it.type) {

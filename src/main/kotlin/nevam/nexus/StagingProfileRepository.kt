@@ -5,6 +5,7 @@ import com.squareup.moshi.Json
 import nevam.Pom
 import nevam.nexus.StagingProfileRepository.Status.Closed
 import nevam.nexus.StagingProfileRepository.Status.Open
+import nevam.nexus.StagingProfileRepository.Status.Released
 import nevam.nexus.StagingProfileRepository.Status.Transitioning
 import nevam.nexus.StagingProfileRepository.Status.Unknown
 import nevam.nexus.network.ProfileId
@@ -46,6 +47,7 @@ data class StagingProfileRepository(
       else -> when {
         type.trim().equals("open", ignoreCase = true) -> Open
         type.trim().equals("closed", ignoreCase = true) -> Closed
+        type.trim().equals("released", ignoreCase = true) -> Released
         else -> Unknown(type)
       }
     }
@@ -58,6 +60,7 @@ data class StagingProfileRepository(
   sealed class Status(val displayValue: String) {
     object Open : Status("Open")
     object Closed : Status("Closed")
+    object Released : Status("Released")
     object Transitioning : Status("Transitioning")
     data class Unknown(val value: String) : Status(value)
   }

@@ -10,6 +10,7 @@ import nevam.nexus.Nexus
 import nevam.nexus.StagingProfileRepository
 import nevam.nexus.StagingProfileRepository.Status.Closed
 import nevam.nexus.StagingProfileRepository.Status.Open
+import nevam.nexus.StagingProfileRepository.Status.Released
 import nevam.nexus.StagingProfileRepository.Status.Transitioning
 import nevam.nexus.StagingProfileRepository.Status.Unknown
 import nevam.nexus.StatusCheckState.Checking
@@ -45,9 +46,10 @@ class NexusCommand(
     with(selectedRepository) {
       when (status) {
         is Open, is Closed -> Unit
+        is Released -> throw CliktError("Repository $id is already released.")
         is Transitioning -> throw CliktError("Repository $id is already transitioning to (probably) release.")
         is Unknown -> throw CliktError("Unknown status of repository: '$type'")
-      }
+      }.exhaustive()
     }
 
     if (selectedRepository.status is Open) {
@@ -122,7 +124,7 @@ class NexusCommand(
     val contentUrl = repository.contentUrl(pom)
     echo(
         """
-          |The contents of ${pom.artifactId} ${pom.version} (${repository.id}) can be checked here before it's released: 
+          |The contents of ${pom.artifactId} ${pom.version} (${repository.id}) can be verified here before it's released: 
           |$contentUrl
         """.trimMargin()
     )
@@ -179,3 +181,5 @@ class NexusCommand(
 
   private fun echoNewLine() = echo("")
 }
+
+private fun Unit.exhaustive(): Any = this
