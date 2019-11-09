@@ -1,3 +1,5 @@
+@file:JvmName("App")
+
 package nevam
 
 import java.io.FileInputStream
