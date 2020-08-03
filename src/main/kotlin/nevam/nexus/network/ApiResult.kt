@@ -7,7 +7,8 @@ sealed class ApiResult<out T : Any> {
       Server,
       Network,
       UserAuth,
-      Unknown
+      Unknown,
+      NotFound
     }
   }
 }
