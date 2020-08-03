@@ -15,9 +15,11 @@ class NexusCommandTest {
       nexus = nexus,
       input = UserInput(console),
       pom = Pom(
-          groupId = "cage.nicolas",
-          artifactId = "ghostrider",
-          version = "1.0.0"
+          MavenCoordinates(
+              groupId = "cage.nicolas",
+              artifactId = "ghostrider",
+              version = "1.0.0"
+          )
       )
   )
 

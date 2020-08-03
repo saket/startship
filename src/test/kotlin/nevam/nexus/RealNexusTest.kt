@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.TestScheduler
 import nevam.FAKE
+import nevam.MavenCoordinates
 import nevam.Pom
 import nevam.extensions.advanceTimeBy
 import nevam.extensions.second
@@ -25,12 +26,7 @@ class RealNexusTest {
   private val nexus = RealNexus(
       api = api,
       debugMode = false,
-      config = config,
-      pom = Pom(
-          groupId = "me.saket",
-          artifactId = "flick",
-          version = "1.8.0"
-      )
+      config = config
   )
 
   init {

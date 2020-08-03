@@ -1,19 +1,9 @@
 package nevam
 
-data class Pom(
-  /** e.g., "app.cash.paparazzi" */
-  val groupId: String,
-
-  /** e.g., "paparazzi" */
-  val artifactId: String,
-
-  /** e.g., "0.0.1" */
-  val version: String
-) {
-
-  /** e.g., app.cash.paparazzi:paparazzi:0.0.1 */
-  val mavenAddress
-    get() = "$groupId:$artifactId:$version"
+data class Pom(val coordinates: MavenCoordinates) {
+  private val groupId: String get() = coordinates.groupId
+  val artifactId: String get() = coordinates.artifactId
+  val version: String get() = coordinates.version
 
   /** e.g., app/cash/paparazzi/paparazzi/0.0.1 */
   fun mavenDirectory(includeVersion: Boolean): String {

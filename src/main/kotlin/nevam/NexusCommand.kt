@@ -25,7 +25,7 @@ class NexusCommand(
   private val nexus: Nexus,
   private val input: UserInput,
   private val pom: Pom
-) : CliktCommand(name = "Nevam") {
+) : CliktCommand(name = "release") {
 
   override fun run() {
     echo("Fetching staged repositories...")
@@ -60,9 +60,7 @@ class NexusCommand(
   }
 
   private fun promptUserToSelectARepository(options: List<StagingProfileRepository>): StagingProfileRepository {
-    if (options.size == 1) {
-      return options.single()
-    }
+    check(options.size > 1)
 
     echo("You have multiple staged repositories.")
     while (true) {

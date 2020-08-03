@@ -5,14 +5,10 @@ import org.junit.Test
 
 class PomTest {
 
-  private val pom = Pom(
-      groupId = "me.saket",
-      artifactId = "flick",
-      version = "1.8.0"
-  )
+  private val pom = Pom(MavenCoordinates.from("me.saket:flick:1.8.0"))
 
   @Test fun `maven address`() {
-    assertThat(pom.mavenAddress).isEqualTo("me.saket:flick:1.8.0")
+    assertThat(pom.coordinates.toString()).isEqualTo("me.saket:flick:1.8.0")
   }
 
   @Test fun `maven directory`() {

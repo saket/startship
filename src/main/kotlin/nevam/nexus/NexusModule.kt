@@ -33,7 +33,7 @@ class NexusModule(
       .addNetworkInterceptor(contentTypeInterceptor)
       .build()
 
-  val nexusApi = networkModule.retrofitBuilder
+  val nexusApi: NexusApi = networkModule.retrofitBuilder
       .baseUrl(repositoryUrl)
       .client(okHttpClient)
       .build()
