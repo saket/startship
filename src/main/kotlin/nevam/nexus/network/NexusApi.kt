@@ -41,12 +41,18 @@ interface NexusApi {
     @Body request: RepositoryActionRequest
   ): Call<Void>
 
-  /**
-   * @param repositoryPath e.g., "me/saket/flick".
-   */
+  /** @param repositoryPath e.g., "me/saket/flick". */
   @Headers("Death-To-Xml: true")
   @GET("https://repo1.maven.org/maven2/{repositoryPath}/maven-metadata.xml")
-  fun mavenMetadata(
+  fun releaseMavenMetadata(
+    @Path("repositoryPath", encoded = true) repositoryPath: String
+  ): Single<MavenMetadata>
+
+  /** @param repositoryPath e.g., "me/saket/flick". */
+  @Headers("Death-To-Xml: true")
+  @GET("/service/local/repositories/{repositoryId}/content/{repositoryPath}/maven-metadata.xml")
+  fun stagingMavenMetadata(
+    @Path("repositoryId") repositoryId: RepositoryId,
     @Path("repositoryPath", encoded = true) repositoryPath: String
   ): Single<MavenMetadata>
 

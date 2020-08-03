@@ -87,6 +87,10 @@ class MockNexusApi : NexusApi {
     }
   }
 
+  override fun stagingMavenMetadata(repositoryId: RepositoryId, repositoryPath: String): Single<MavenMetadata> {
+    TODO()
+  }
+
   override fun close(profileId: ProfileId, request: RepositoryActionRequest): Call<Void> {
     return FakeCall {
       Thread.sleep(500)
@@ -134,7 +138,7 @@ class MockNexusApi : NexusApi {
   }
 
   var releasedStatusRetryCount = -1
-  override fun mavenMetadata(repositoryPath: String): Single<MavenMetadata> {
+  override fun releaseMavenMetadata(repositoryPath: String): Single<MavenMetadata> {
     return Single.fromCallable {
       if (releasedStatusRetryCount++ >= 2) {
         MavenMetadata(

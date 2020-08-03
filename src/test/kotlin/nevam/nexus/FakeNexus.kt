@@ -1,7 +1,9 @@
 package nevam.nexus
 
 import io.reactivex.Observable
+import io.reactivex.Single
 import nevam.Pom
+import nevam.nexus.network.MavenMetadata
 import nevam.nexus.network.RepositoryId
 
 object FakeNexus : Nexus {
@@ -12,6 +14,10 @@ object FakeNexus : Nexus {
       repositories = listOf(value)
     }
   override fun stagingRepositories() = repositories
+
+  override fun isMetadataPresent(repository: StagingProfileRepository, pom: Pom): Single<Boolean> {
+    TODO()
+  }
 
   override fun close(repository: StagingProfileRepository) = TODO()
 

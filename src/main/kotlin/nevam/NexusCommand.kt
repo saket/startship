@@ -2,6 +2,7 @@ package nevam
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
+import com.github.ajalt.clikt.core.PrintMessage
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.blockingSubscribeBy
 import nevam.clikt.UserInput
@@ -39,9 +40,9 @@ class NexusCommand(
 
     val selectedRepository = when (repositories.size) {
       0 -> throw CliktError("You don't have any staged repositories.")
-      1 -> repositories.single()
       else -> promptUserToSelectARepository(repositories)
     }
+    validate(selectedRepository)
 
     with(selectedRepository) {
       when (status) {
@@ -60,7 +61,11 @@ class NexusCommand(
   }
 
   private fun promptUserToSelectARepository(options: List<StagingProfileRepository>): StagingProfileRepository {
-    check(options.size > 1)
+    if (options.size == 1) {
+      return options.single().also {
+        echo("Selecting ${it.id}")
+      }
+    }
 
     echo("You have multiple staged repositories.")
     while (true) {
@@ -83,6 +88,16 @@ class NexusCommand(
           echo("\nNot sure what you meant by '$answer'. Let's try again by entering a row number from the table above?")
         }
       }
+    }
+  }
+
+  private fun validate(repository: StagingProfileRepository) {
+    val isMetadataPresent = nexus.isMetadataPresent(repository, pom).blockingGet()
+    if (!isMetadataPresent) {
+      echoNewLine()
+      echo("Error: ${repository.id}'s maven coordinates don't match ${pom.coordinates}.")
+      echo("Check if you uploaded an incorrect archive: https://oss.sonatype.org/#stagingRepositories.")
+      throw CliktError("Aborted")
     }
   }
 

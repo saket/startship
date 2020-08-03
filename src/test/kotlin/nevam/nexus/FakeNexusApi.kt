@@ -1,6 +1,5 @@
 package nevam.nexus
 
-import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.subjects.BehaviorSubject
 import nevam.nexus.network.MavenMetadata
@@ -20,6 +19,10 @@ class FakeNexusApi : NexusApi {
     return repository.firstOrError()
   }
 
+  override fun stagingMavenMetadata(repositoryId: RepositoryId, repositoryPath: String): Single<MavenMetadata> {
+    TODO()
+  }
+
   override fun close(profileId: ProfileId, request: RepositoryActionRequest): Call<Void> {
     TODO()
   }
@@ -32,7 +35,7 @@ class FakeNexusApi : NexusApi {
     TODO()
   }
 
-  override fun mavenMetadata(repositoryPath: String): Single<MavenMetadata> {
+  override fun releaseMavenMetadata(repositoryPath: String): Single<MavenMetadata> {
     TODO()
   }
 }

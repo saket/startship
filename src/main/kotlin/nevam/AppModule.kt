@@ -5,11 +5,8 @@ import io.reactivex.plugins.RxJavaPlugins
 import nevam.clikt.UserInput
 import nevam.network.NetworkModule
 import nevam.nexus.NexusConfig
-import nevam.nexus.NexusConfig.Companion
 import nevam.nexus.NexusModule
 import nevam.nexus.RealNexus
-import nevam.nexus.network.MOCK_NEXUS_CONFIG
-import nevam.nexus.network.MockNexusApi
 
 class AppModule(
   user: NexusUser,

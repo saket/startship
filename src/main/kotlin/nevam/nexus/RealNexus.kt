@@ -3,7 +3,9 @@ package nevam.nexus
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.output.TermUi.echo
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers.single
+import nevam.MavenCoordinates
 import nevam.Pom
 import nevam.extensions.Observables
 import nevam.extensions.executeAsResult
@@ -23,9 +25,11 @@ import nevam.nexus.StatusCheckState.RetryingIn
 import nevam.nexus.StatusCheckState.WillRetry
 import nevam.nexus.network.ApiResult.Failure
 import nevam.nexus.network.ApiResult.Failure.Type.Network
+import nevam.nexus.network.ApiResult.Failure.Type.NotFound
 import nevam.nexus.network.ApiResult.Failure.Type.Server
 import nevam.nexus.network.ApiResult.Failure.Type.UserAuth
 import nevam.nexus.network.ApiResult.Success
+import nevam.nexus.network.MavenMetadata
 import nevam.nexus.network.NexusApi
 import nevam.nexus.network.RepositoryActionRequest
 import nevam.nexus.network.RepositoryId
@@ -45,6 +49,22 @@ class RealNexus(
         else -> throw genericApiError(result)
       }
     }
+  }
+
+  override fun isMetadataPresent(repository: StagingProfileRepository, pom: Pom): Single<Boolean> {
+    return api.stagingMavenMetadata(repository.id, repositoryPath = pom.mavenDirectory(includeVersion = false))
+        .subscribeOn(single())
+        .mapToResult()
+        .map {
+          when (it) {
+            is Success -> true
+            is Failure -> when (it.type) {
+              NotFound -> false
+              UserAuth -> throw invalidCredentialsError()
+              else -> throw genericApiError(it)
+            }
+          }
+        }
   }
 
   override fun close(repository: StagingProfileRepository) {
@@ -134,7 +154,7 @@ class RealNexus(
       nextRetryDelaySeconds = (nextRetryDelaySeconds * checkConfig.backoffFactor).toLong()
     }
 
-    return api.mavenMetadata(pom.mavenDirectory(includeVersion = false))
+    return api.releaseMavenMetadata(pom.mavenDirectory(includeVersion = false))
         .subscribeOn(single())
         .mapToResult()
         .map {
