@@ -19,7 +19,7 @@ object XmlToJsonBodyInterceptor : Interceptor {
     val xmlHeader = chain.request().headers.firstOrNull { it == "Death-To-Xml" to "true" }
     val response = chain.proceed(chain.request())
 
-    return if (xmlHeader != null) {
+    return if (xmlHeader != null && response.isSuccessful) {
       // Loading the entire response in memory is a terrible
       // idea, but should be okay for this specific endpoint.
       val xml = response.body!!.string()
