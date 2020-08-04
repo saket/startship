@@ -2,10 +2,15 @@ package nevam
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
+import com.github.ajalt.clikt.output.defaultCliktConsole
+import com.github.ajalt.clikt.parameters.options.convert
+import com.github.ajalt.clikt.parameters.options.defaultLazy
+import com.github.ajalt.clikt.parameters.options.flag
+import com.github.ajalt.clikt.parameters.options.option
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.blockingSubscribeBy
 import nevam.clikt.UserInput
-import nevam.extensions.hour
+import nevam.util.hour
 import nevam.nexus.Nexus
 import nevam.nexus.StagingProfileRepository
 import nevam.nexus.StagingProfileRepository.Status.Closed
@@ -19,13 +24,28 @@ import nevam.nexus.StatusCheckState.GaveUp
 import nevam.nexus.StatusCheckState.RetryingIn
 import nevam.nexus.StatusCheckState.WillRetry
 import nevam.nexus.toTableString
+import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.system.exitProcess
 
-class NexusCommand(
-  private val nexus: Nexus,
-  private val input: UserInput,
-  private val pom: Pom
-) : CliktCommand(name = "release") {
+class ReleaseCommand : CliktCommand(name = "release") {
+  private val debugMode by option("-d", "--debug", help = "whether to print debug logs")
+      .flag(default = false)
+
+  private val coordinates by option("-c", "--coordinates", help = "library's maven address")
+      .convert { MavenCoordinates.from(it) }
+      .defaultLazy { MavenCoordinates.readFrom("gradle.properties") }
+
+  private val appModule by lazy {
+    AppModule(
+        user = NexusUser.readFrom("~/.gradle/gradle.properties"),
+        debugMode = debugMode,
+        pom = Pom(coordinates)
+    )
+  }
+
+  private val input: UserInput = UserInput(defaultCliktConsole())
+  private val nexus: Nexus get() = appModule.nexusRepository
+  private val pom: Pom get() = appModule.pom
 
   override fun run() {
     echo("Preparing to release ${pom.coordinates}")

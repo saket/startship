@@ -7,11 +7,11 @@ import nevam.nexus.StagingProfileRepository
 import org.junit.Ignore
 import org.junit.Test
 
-class NexusCommandTest {
+class ReleaseCommandTest {
 
   private val nexus = FakeNexus
   private val console = FakeCliktConsole()
-  private val app = NexusCommand(
+  private val app = ReleaseCommand(
       nexus = nexus,
       input = UserInput(console),
       pom = Pom(

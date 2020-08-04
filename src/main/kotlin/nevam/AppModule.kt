@@ -1,17 +1,17 @@
 package nevam
 
-import com.github.ajalt.clikt.output.defaultCliktConsole
 import io.reactivex.plugins.RxJavaPlugins
-import nevam.clikt.UserInput
 import nevam.network.NetworkModule
 import nevam.nexus.NexusConfig
 import nevam.nexus.NexusModule
 import nevam.nexus.RealNexus
+import nevam.nexus.network.MOCK_NEXUS_CONFIG
+import nevam.nexus.network.MockNexusApi
 
 class AppModule(
   user: NexusUser,
   debugMode: Boolean,
-  pom: Pom
+  val pom: Pom
 ) {
   init {
     RxJavaPlugins.setErrorHandler { /* Ignored exceptions. */ }
@@ -25,16 +25,10 @@ class AppModule(
       user = user
   )
 
-  private val nexusRepository = RealNexus(
+  val nexusRepository = RealNexus(
       api = nexusModule.nexusApi,
       debugMode = debugMode,
       config = NexusConfig.DEFAULT
-  )
-
-  val nexusCommand = NexusCommand(
-      nexus = nexusRepository,
-      input = UserInput(defaultCliktConsole()),
-      pom = pom
   )
 }
 

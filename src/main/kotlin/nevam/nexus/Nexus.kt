@@ -3,7 +3,6 @@ package nevam.nexus
 import io.reactivex.Observable
 import io.reactivex.Single
 import nevam.Pom
-import nevam.nexus.network.MavenMetadata
 import nevam.nexus.network.RepositoryId
 
 interface Nexus {

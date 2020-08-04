@@ -1,5 +1,8 @@
 package nevam
 
+import com.github.ajalt.clikt.core.CliktError
+import nevam.util.GradleProperties
+
 data class MavenCoordinates(
   /** e.g., "app.cash.paparazzi" */
   val groupId: String,
@@ -24,6 +27,21 @@ data class MavenCoordinates(
 
       val (groupId, artifactId, version) = coordinates.split(":")
       return MavenCoordinates(groupId, artifactId, version)
+    }
+
+    fun readFrom(fileName: String): MavenCoordinates {
+      try {
+        val properties = GradleProperties(fileName)
+        return MavenCoordinates(
+            groupId = properties["GROUP"],
+            artifactId = properties["POM_ARTIFACT_ID"],
+            version = properties["VERSION_NAME"]
+        )
+      } catch (ignored: Throwable) {
+        throw CliktError(
+            "Error: couldn't read maven coordinates from $fileName. You can pass them manually using -c option."
+        )
+      }
     }
   }
 }
