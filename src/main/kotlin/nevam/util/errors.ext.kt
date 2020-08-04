@@ -1,4 +1,4 @@
-package nevam.extensions
+package nevam.util
 
 import java.io.PrintWriter
 import java.io.StringWriter

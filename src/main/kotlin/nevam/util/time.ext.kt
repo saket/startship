@@ -1,4 +1,4 @@
-package nevam.extensions
+package nevam.util
 
 import io.reactivex.Observable
 import io.reactivex.Scheduler
@@ -6,7 +6,6 @@ import io.reactivex.schedulers.Schedulers
 import io.reactivex.schedulers.TestScheduler
 import java.time.Duration
 import java.util.concurrent.TimeUnit.MILLISECONDS
-import kotlin.math.roundToLong
 
 val Int.minutes: Duration
   get() = Duration.ofMinutes(toLong())

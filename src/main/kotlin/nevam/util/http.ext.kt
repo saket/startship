@@ -1,4 +1,4 @@
-package nevam.extensions
+package nevam.util
 
 import io.reactivex.Completable
 import io.reactivex.Single
@@ -13,7 +13,6 @@ import nevam.nexus.network.ApiResult.Success
 import retrofit2.Call
 import retrofit2.HttpException
 import java.io.IOException
-import java.lang.Exception
 
 fun <T : Any> Call<T>.executeAsResult(): ApiResult<T> {
   return try {

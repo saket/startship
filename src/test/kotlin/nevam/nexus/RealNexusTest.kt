@@ -4,9 +4,9 @@ import com.google.common.truth.Truth.assertThat
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.TestScheduler
 import nevam.FAKE
-import nevam.extensions.advanceTimeBy
-import nevam.extensions.second
-import nevam.extensions.seconds
+import nevam.util.advanceTimeBy
+import nevam.util.second
+import nevam.util.seconds
 import nevam.isInstanceOf
 import nevam.nexus.StatusCheckState.Checking
 import nevam.nexus.StatusCheckState.Done

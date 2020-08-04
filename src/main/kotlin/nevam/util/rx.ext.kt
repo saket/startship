@@ -1,4 +1,4 @@
-package nevam.extensions
+package nevam.util
 
 import io.reactivex.Observable
 

@@ -2,9 +2,9 @@ package nevam.nexus.network
 
 import io.reactivex.Single
 import nevam.Pom
-import nevam.extensions.hours
-import nevam.extensions.minutes
-import nevam.extensions.seconds
+import nevam.util.hours
+import nevam.util.minutes
+import nevam.util.seconds
 import nevam.nexus.NexusConfig
 import nevam.nexus.NexusConfig.StatusCheck
 import nevam.nexus.StagingProfileRepository

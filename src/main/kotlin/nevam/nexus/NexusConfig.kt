@@ -1,8 +1,8 @@
 package nevam.nexus
 
-import nevam.extensions.hours
-import nevam.extensions.minutes
-import nevam.extensions.seconds
+import nevam.util.hours
+import nevam.util.minutes
+import nevam.util.seconds
 import java.time.Duration
 
 data class NexusConfig(

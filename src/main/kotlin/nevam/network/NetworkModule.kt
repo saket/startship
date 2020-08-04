@@ -3,7 +3,7 @@ package nevam.network
 import com.github.ajalt.clikt.output.TermUi
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import nevam.extensions.seconds
+import nevam.util.seconds
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import okhttp3.logging.HttpLoggingInterceptor.Level.BODY
