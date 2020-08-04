@@ -3,14 +3,13 @@
 package nevam
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.parameters.options.convert
+import com.github.ajalt.clikt.parameters.options.defaultLazy
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.clikt.parameters.options.required
-import com.github.ajalt.clikt.parameters.options.validate
-import com.github.ajalt.clikt.parameters.types.double
-import java.io.FileInputStream
-import java.util.Properties
+import java.io.File
+import java.util.Properties as JavaProperties
 
 fun main(args: Array<String>) {
   AppCommand().main(args)
@@ -22,7 +21,7 @@ class AppCommand : CliktCommand() {
 
   private val coordinates by option("-c", "--coordinates", help = "library's maven address")
       .convert { MavenCoordinates.from(it) }
-      .required()
+      .defaultLazy { MavenCoordinates.readFrom("gradle.properties") }
 
   override fun run() {
     val module = AppModule(
@@ -32,16 +31,38 @@ class AppCommand : CliktCommand() {
     )
     module.nexusCommand.main(emptyArray())
   }
+
+  private fun MavenCoordinates.Companion.readFrom(fileName: String): MavenCoordinates {
+    try {
+      val properties = Properties(fileName)
+      return MavenCoordinates(
+          groupId = properties["GROUP"],
+          artifactId = properties["POM_ARTIFACT_ID"],
+          version = properties["VERSION_NAME"]
+      )
+    } catch (ignored: Throwable) {
+      throw CliktError(
+          "Error: couldn't read maven coordinates from $fileName. You can pass them manually using -c option."
+      )
+    }
+  }
 }
 
 private fun readUserFromGradleProperties(): NexusUser {
-  val property = { name: String ->
-    val input = FileInputStream("/Users/saket/.gradle/gradle.properties")
-    val prop = Properties().apply { load(input) }
-    prop.getProperty(name) ?: error("$name not found in ~/.gradle/gradle.properties")
-  }
+  val properties = Properties("${System.getProperty("user.home")}/.gradle/gradle.properties")
   return NexusUser(
-      username = property("SONATYPE_NEXUS_USERNAME"),
-      password = property("SONATYPE_NEXUS_PASSWORD")
+      username = properties["SONATYPE_NEXUS_USERNAME"],
+      password = properties["SONATYPE_NEXUS_PASSWORD"]
   )
+}
+
+class Properties(fileName: String) {
+  private val file = File(fileName)
+  private val javaProperties = JavaProperties().apply {
+    file.bufferedReader().use { load(it) }
+  }
+
+  operator fun get(key: String): String =
+    javaProperties.getProperty(key)
+        ?: throw CliktError("Error: $key not found in ${file.absolutePath}")
 }

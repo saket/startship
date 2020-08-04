@@ -97,7 +97,7 @@ class NexusCommand(
       echoNewLine()
       echo("Error: ${repository.id}'s maven coordinates don't match ${pom.coordinates}.")
       echo("Check if you uploaded an incorrect archive: https://oss.sonatype.org/#stagingRepositories.")
-      throw CliktError("Aborted")
+      throw CliktError("Aborted!")
     }
   }
 
