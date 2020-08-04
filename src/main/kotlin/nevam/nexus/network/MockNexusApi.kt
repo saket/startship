@@ -54,7 +54,7 @@ class MockNexusApi(private val pom: Pom) : NexusApi {
       StagingRepositoriesResponse(
           listOf(
 //              StagingProfileRepository(
-//                  profileName = "me.saket",
+//                  profileName = "me.saket (fake)",
 //                  id = "mesaket-1042",
 //                  type = "closed",
 //                  updatedDate = "Wed Nov 06 00:50:51 UTC 2019",
@@ -66,7 +66,7 @@ class MockNexusApi(private val pom: Pom) : NexusApi {
                   type = "open",
                   updatedAtString = "Tue Aug 04 01:17:19 UTC 2020",
                   profileId = "999",
-                  profileName = "me.saket",
+                  profileName = "me.saket (fake)",
                   isTransitioning = false
               )
           )

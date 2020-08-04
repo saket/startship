@@ -24,7 +24,6 @@ import nevam.nexus.StatusCheckState.GaveUp
 import nevam.nexus.StatusCheckState.RetryingIn
 import nevam.nexus.StatusCheckState.WillRetry
 import nevam.nexus.toTableString
-import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.system.exitProcess
 
 class ReleaseCommand : CliktCommand(name = "release") {
@@ -211,7 +210,14 @@ class ReleaseCommand : CliktCommand(name = "release") {
   }
 
   private fun drop(repository: StagingProfileRepository) {
-    echo("TODO: drop ${repository.id} repository in background")
+    echo("Dropping ${repository.id} in the meantime...")
+    try {
+      nexus.drop(repository)
+      echo("Job's done.")
+
+    } catch (e: Throwable) {
+      echo("Failed. You can try doing it manually at https://oss.sonatype.org/#stagingRepositories")
+    }
   }
 
   private fun echoNewLine() = echo("")
