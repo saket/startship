@@ -1,3 +1,5 @@
 package nevam
 
-data class NexusUser(val username: String, val password: String)
+data class NexusUser(val username: String, val password: String) {
+  companion object
+}

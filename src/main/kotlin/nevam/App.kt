@@ -25,39 +25,39 @@ class AppCommand : CliktCommand() {
 
   override fun run() {
     val module = AppModule(
-        user = readUserFromGradleProperties(),
+        user = NexusUser.readFrom("~/.gradle/gradle.properties"),
         debugMode = debugMode,
         pom = Pom(coordinates)
     )
     module.nexusCommand.main(emptyArray())
   }
+}
 
-  private fun MavenCoordinates.Companion.readFrom(fileName: String): MavenCoordinates {
-    try {
-      val properties = Properties(fileName)
-      return MavenCoordinates(
-          groupId = properties["GROUP"],
-          artifactId = properties["POM_ARTIFACT_ID"],
-          version = properties["VERSION_NAME"]
-      )
-    } catch (ignored: Throwable) {
-      throw CliktError(
-          "Error: couldn't read maven coordinates from $fileName. You can pass them manually using -c option."
-      )
-    }
+private fun MavenCoordinates.Companion.readFrom(fileName: String): MavenCoordinates {
+  try {
+    val properties = Properties(fileName)
+    return MavenCoordinates(
+        groupId = properties["GROUP"],
+        artifactId = properties["POM_ARTIFACT_ID"],
+        version = properties["VERSION_NAME"]
+    )
+  } catch (ignored: Throwable) {
+    throw CliktError(
+        "Error: couldn't read maven coordinates from $fileName. You can pass them manually using -c option."
+    )
   }
 }
 
-private fun readUserFromGradleProperties(): NexusUser {
-  val properties = Properties("${System.getProperty("user.home")}/.gradle/gradle.properties")
+private fun NexusUser.Companion.readFrom(fileName: String): NexusUser {
+  val properties = Properties(fileName)
   return NexusUser(
       username = properties["SONATYPE_NEXUS_USERNAME"],
       password = properties["SONATYPE_NEXUS_PASSWORD"]
   )
 }
 
-class Properties(fileName: String) {
-  private val file = File(fileName)
+private class Properties(fileName: String) {
+  private val file = File(fileName.replace("~", System.getProperty("user.home")))
   private val javaProperties = JavaProperties().apply {
     file.bufferedReader().use { load(it) }
   }
