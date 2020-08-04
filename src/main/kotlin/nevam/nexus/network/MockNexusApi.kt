@@ -1,6 +1,7 @@
 package nevam.nexus.network
 
 import io.reactivex.Single
+import nevam.Pom
 import nevam.extensions.hours
 import nevam.extensions.minutes
 import nevam.extensions.seconds
@@ -14,6 +15,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.util.concurrent.TimeUnit.MILLISECONDS
 
+@Suppress("unused")
 val MOCK_NEXUS_CONFIG = NexusConfig(
     closedStatusCheck = StatusCheck(
         giveUpAfter = 10.minutes,
@@ -27,38 +29,23 @@ val MOCK_NEXUS_CONFIG = NexusConfig(
     )
 )
 
-class MockNexusApi : NexusApi {
+/**
+ * Used for testing on the CLI.
+ */
+@Suppress("unused")
+class MockNexusApi(private val pom: Pom) : NexusApi {
 
   private class FakeCall<T>(val response: () -> T?) : Call<T> {
     private var executed = false
-
-    override fun enqueue(callback: Callback<T>) {
-      TODO()
-    }
-
-    override fun isExecuted(): Boolean {
-      return executed
-    }
-
-    override fun clone(): Call<T> {
-      return FakeCall(response)
-    }
-
-    override fun isCanceled(): Boolean {
-      TODO()
-    }
-
-    override fun cancel() {
-      TODO()
-    }
-
+    override fun enqueue(callback: Callback<T>): Unit = TODO()
+    override fun isExecuted(): Boolean = executed
+    override fun clone(): Call<T> = FakeCall(response)
+    override fun isCanceled(): Boolean = TODO()
+    override fun cancel(): Unit = TODO()
+    override fun request(): Request = TODO()
     override fun execute(): Response<T> {
       executed = true
       return Response.success(response())
-    }
-
-    override fun request(): Request {
-      TODO()
     }
   }
 
@@ -77,7 +64,7 @@ class MockNexusApi : NexusApi {
               StagingProfileRepository(
                   id = "mesaket-1047",
                   type = "open",
-                  updatedDate = "Wed Nov 06 01:28:19 UTC 2019",
+                  updatedDate = "Mon Aug 03 01:17:19 UTC 2019",
                   profileId = "999",
                   profileName = "me.saket",
                   isTransitioning = false
@@ -88,7 +75,18 @@ class MockNexusApi : NexusApi {
   }
 
   override fun stagingMavenMetadata(repositoryId: RepositoryId, repositoryPath: String): Single<MavenMetadata> {
-    TODO()
+    return Single.just(
+        MavenMetadata(
+            MavenMetadata.Data(
+                groupId = "foo",
+                artifactId = "foo",
+                versions = MavenMetadata.Versions(
+                    release = "foo",
+                    lastUpdatedDate = "foo"
+                )
+            )
+        )
+    )
   }
 
   override fun close(profileId: ProfileId, request: RepositoryActionRequest): Call<Void> {
@@ -143,10 +141,10 @@ class MockNexusApi : NexusApi {
       if (releasedStatusRetryCount++ >= 2) {
         MavenMetadata(
             MavenMetadata.Data(
-                groupId = "me.saket",
-                artifactId = "nevamtest",
+                groupId = pom.groupId,
+                artifactId = pom.artifactId,
                 versions = MavenMetadata.Versions(
-                    release = "1.3.1",
+                    release = pom.version,
                     lastUpdatedDate = "20191108065802"
                 )
             )
@@ -154,11 +152,11 @@ class MockNexusApi : NexusApi {
       } else {
         MavenMetadata(
             MavenMetadata.Data(
-                groupId = "me.saket",
-                artifactId = "nevamtest",
+                groupId = pom.groupId,
+                artifactId = pom.artifactId,
                 versions = MavenMetadata.Versions(
-                    release = "1.3.0",
-                    lastUpdatedDate = "20191108065802"
+                    release = "${pom.version}-old",
+                    lastUpdatedDate = "20191108065801"
                 )
             )
         )

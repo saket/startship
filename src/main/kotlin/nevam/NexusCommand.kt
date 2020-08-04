@@ -2,7 +2,6 @@ package nevam
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
-import com.github.ajalt.clikt.core.PrintMessage
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.blockingSubscribeBy
 import nevam.clikt.UserInput
@@ -29,6 +28,8 @@ class NexusCommand(
 ) : CliktCommand(name = "release") {
 
   override fun run() {
+    echo("Preparing to release ${pom.coordinates}")
+    echoNewLine()
     echo("Fetching staged repositories...")
     val repositories = nexus.stagingRepositories()
 
@@ -57,14 +58,12 @@ class NexusCommand(
       close(selectedRepository)
     }
     release(selectedRepository)
-    dropSilently(selectedRepository)
+    drop(selectedRepository)
   }
 
   private fun promptUserToSelectARepository(options: List<StagingProfileRepository>): StagingProfileRepository {
     if (options.size == 1) {
-      return options.single().also {
-        echo("Selecting ${it.id}")
-      }
+      return options.single()
     }
 
     echo("You have multiple staged repositories.")
@@ -147,7 +146,7 @@ class NexusCommand(
     echoNewLine()
     echo("Jumping into hyperspace... ", trailingNewline = false)
     nexus.release(repository)
-    echo("${pom.artifactId}.${pom.version} is released.")
+    echo("${pom.artifactId}:${pom.version} is released.")
 
     echo("Checking with Maven Central if it's available yet (can take an hour or two)...")
     waitTillAvailable().echoStreamingProgress()
@@ -161,7 +160,7 @@ class NexusCommand(
             is Checking -> "Talking to Maven Central..."
             is WillRetry -> "Nope, not done yet"
             is RetryingIn -> "Checking again in ${it.secondsRemaining}s..."
-            is Done -> "Available now. Go ahead and announce ${pom.artifactId} ${pom.version} to public!"
+            is Done -> "Available now. Go ahead and announce ${pom.artifactId}:${pom.version} to public!"
             is GaveUp -> {
               val emptyLineForCoveringLastEcho = Array(MAX_LINE_LENGTH) { " " }.joinToString(separator = "")
               val timeSpent = when {
@@ -191,7 +190,7 @@ class NexusCommand(
     )
   }
 
-  private fun dropSilently(repository: StagingProfileRepository) {
+  private fun drop(repository: StagingProfileRepository) {
     echo("TODO: drop ${repository.id} repository in background")
   }
 

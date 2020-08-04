@@ -19,5 +19,5 @@ interface Nexus {
 
   fun pollUntilSyncedToMavenCentral(pom: Pom): Observable<StatusCheckState>
 
-  fun dropInBackground(repository: StagingProfileRepository)
+  fun drop(repository: StagingProfileRepository)
 }

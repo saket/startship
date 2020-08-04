@@ -193,7 +193,7 @@ class RealNexus(
         .takeUntil { it is Done || it is GaveUp }
   }
 
-  override fun dropInBackground(repository: StagingProfileRepository) {
+  override fun drop(repository: StagingProfileRepository) {
     val request = RepositoryActionRequest(repository.id)
 
     return when (val result = api.drop(repository.profileId, request).executeAsResult()) {

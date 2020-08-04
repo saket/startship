@@ -29,7 +29,7 @@ object FakeNexus : Nexus {
     TODO()
   }
 
-  override fun dropInBackground(repository: StagingProfileRepository) {
+  override fun drop(repository: StagingProfileRepository) {
     TODO()
   }
 
