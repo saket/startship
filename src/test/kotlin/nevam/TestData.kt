@@ -7,7 +7,7 @@ val StagingProfileRepository.Companion.FAKE: StagingProfileRepository
       id = "cagenicolas_1206",
       type = "closed",
       isTransitioning = false,
-      updatedDate = "Sometime",
+      updatedAtString = "Sometime",
       profileId = "9000",
       profileName = "cage.nicolas"
   )

@@ -10,6 +10,11 @@ import nevam.nexus.StagingProfileRepository.Status.Transitioning
 import nevam.nexus.StagingProfileRepository.Status.Unknown
 import nevam.nexus.network.ProfileId
 import nevam.nexus.network.RepositoryId
+import java.time.Clock
+import java.time.Duration
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import kotlin.LazyThreadSafetyMode.NONE
 
 data class StagingRepositoriesResponse(
   @Json(name = "data")
@@ -36,12 +41,12 @@ data class StagingProfileRepository(
   private val isTransitioning: Boolean,
 
   @Json(name = "updatedDate")
-  val updatedDate: String
+  val updatedAtString: String
 ) {
 
-  companion object
+  companion object  // for extensions.
 
-  val status: Status by lazy {
+  val status: Status by lazy(NONE) {
     when {
       isTransitioning -> Transitioning
       else -> when {
@@ -69,13 +74,13 @@ data class StagingProfileRepository(
 fun Collection<StagingProfileRepository>.toTableString(): String {
   val printRowNumber = size > 1
 
-  val headers = mutableListOf("Profile name", "Repository ID", "Status", "Updated at")
+  val headers = mutableListOf("Profile name", "Repository ID", "Status", "Update time")
   if (printRowNumber) {
     headers.add(0, "")
   }
 
   val rows = mapIndexed { index, repo ->
-    val row = mutableListOf(repo.profileName, repo.id, repo.status.displayValue, repo.updatedDate)
+    val row = mutableListOf(repo.profileName, repo.id, repo.status.displayValue, repo.timestampRelativeToNow())
     if (printRowNumber) {
       row.add(0, "${index + 1}")
     }
@@ -83,4 +88,27 @@ fun Collection<StagingProfileRepository>.toTableString(): String {
   }
 
   return FlipTable.of(headers.toTypedArray(), rows.toTypedArray())
+}
+
+fun StagingProfileRepository.timestampRelativeToNow(clock: Clock = Clock.systemUTC()): String {
+  val formatter = DateTimeFormatter.ofPattern("eee MMM dd HH:mm:ss 'UTC' yyyy")
+  val updatedAt = LocalDateTime.parse(updatedAtString, formatter)
+  val timeSince = Duration.between(updatedAt, LocalDateTime.now(clock))
+
+  return when {
+    timeSince < Duration.ofMinutes(1) -> {
+      "${timeSince.seconds}s ago"
+    }
+    timeSince < Duration.ofHours(1) -> {
+      val mins = timeSince.toMinutes()
+      val seconds = timeSince.minusMinutes(mins).seconds
+      "${mins}m ${seconds}s ago"
+    }
+    timeSince < Duration.ofDays(1) -> {
+      val hours = timeSince.toHours()
+      val minutes = timeSince.minusHours(hours).toMinutes()
+      "${hours}h ${minutes}m ago"
+    }
+    else -> updatedAtString
+  }
 }

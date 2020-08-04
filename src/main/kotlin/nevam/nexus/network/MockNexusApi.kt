@@ -64,7 +64,7 @@ class MockNexusApi(private val pom: Pom) : NexusApi {
               StagingProfileRepository(
                   id = "mesaket-1047",
                   type = "open",
-                  updatedDate = "Mon Aug 03 01:17:19 UTC 2019",
+                  updatedAtString = "Tue Aug 04 01:17:19 UTC 2020",
                   profileId = "999",
                   profileName = "me.saket",
                   isTransitioning = false
@@ -103,7 +103,7 @@ class MockNexusApi(private val pom: Pom) : NexusApi {
         StagingProfileRepository(
             id = "mesaket-1042",
             type = "closed",
-            updatedDate = "Wed Nov 06 00:50:51 UTC 2019",
+            updatedAtString = "Wed Nov 06 00:50:51 UTC 2019",
             profileId = "999",
             profileName = "me.saket",
             isTransitioning = false
@@ -112,7 +112,7 @@ class MockNexusApi(private val pom: Pom) : NexusApi {
         StagingProfileRepository(
             id = "mesaket-1042",
             type = "open",
-            updatedDate = "Wed Nov 06 00:50:51 UTC 2019",
+            updatedAtString = "Wed Nov 06 00:50:51 UTC 2019",
             profileId = "999",
             profileName = "me.saket",
             isTransitioning = true

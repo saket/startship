@@ -4,8 +4,6 @@ import com.google.common.truth.Truth.assertThat
 import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.TestScheduler
 import nevam.FAKE
-import nevam.MavenCoordinates
-import nevam.Pom
 import nevam.extensions.advanceTimeBy
 import nevam.extensions.second
 import nevam.extensions.seconds
@@ -16,6 +14,9 @@ import nevam.nexus.StatusCheckState.GaveUp
 import nevam.nexus.StatusCheckState.RetryingIn
 import nevam.nexus.StatusCheckState.WillRetry
 import org.junit.Test
+import java.time.Clock
+import java.time.Instant
+import java.time.ZoneOffset.UTC
 
 class RealNexusTest {
 
@@ -132,5 +133,29 @@ class RealNexusTest {
     )
     testScheduler.advanceTimeBy(config.closedStatusCheck.initialRetryDelay + 1.second)
     assertThat(statusValues.last()).isInstanceOf<Done>()
+  }
+
+  @Test fun `parse relative timestamp`() {
+    val nowTime = Instant.ofEpochMilli(1596505477212) // Tue Aug 04 01:44:37 UTC 2020
+
+    with(StagingProfileRepository.FAKE.copy(updatedAtString = "Tue Aug 04 01:44:00 UTC 2020")) {
+      val timestamp = timestampRelativeToNow(clock = Clock.fixed(nowTime, UTC))
+      assertThat(timestamp).isEqualTo("37s ago")
+    }
+
+    with(StagingProfileRepository.FAKE.copy(updatedAtString = "Tue Aug 04 01:17:19 UTC 2020")) {
+      val timestamp = timestampRelativeToNow(clock = Clock.fixed(nowTime, UTC))
+      assertThat(timestamp).isEqualTo("27m 18s ago")
+    }
+
+    with(StagingProfileRepository.FAKE.copy(updatedAtString = "Mon Aug 03 14:17:19 UTC 2020")) {
+      val timestamp = timestampRelativeToNow(clock = Clock.fixed(nowTime, UTC))
+      assertThat(timestamp).isEqualTo("11h 27m ago")
+    }
+
+    with(StagingProfileRepository.FAKE.copy(updatedAtString = "Sun Aug 02 01:17:19 UTC 2020")) {
+      val timestamp = timestampRelativeToNow(clock = Clock.fixed(nowTime, UTC))
+      assertThat(timestamp).isEqualTo("27m 18s ago")
+    }
   }
 }
