@@ -198,7 +198,11 @@ class ReleaseCommand : CliktCommand(name = "release") {
 
   private fun Observable<String>.echoStreamingProgress() {
     blockingSubscribeBy(
-        onError = { echo(it.message, err = true); exitProcess(1) },
+        onError = {
+          echoNewLine()
+          echo("Error: ${it.message}", err = true)
+          exitProcess(1)
+        },
         // '\r' moves the cursor to the beginning of the line so
         // that the status message can be updated on the same line.
         onNext = {

@@ -23,6 +23,7 @@ import nevam.nexus.StatusCheckState.GaveUp
 import nevam.nexus.StatusCheckState.RetryingIn
 import nevam.nexus.StatusCheckState.WillRetry
 import nevam.nexus.network.ApiResult.Failure
+import nevam.nexus.network.ApiResult.Failure.Type
 import nevam.nexus.network.ApiResult.Failure.Type.Network
 import nevam.nexus.network.ApiResult.Failure.Type.NotFound
 import nevam.nexus.network.ApiResult.Failure.Type.Server
@@ -164,9 +165,9 @@ class RealNexus(
               }
             }
             is Failure -> when (it.type) {
-              Network, Server -> WillRetry
+              Network, Server, NotFound -> WillRetry
               UserAuth -> throw invalidCredentialsError()
-              else -> throw genericApiError(it)
+              Type.Unknown -> throw genericApiError(it)
             }
           }
         }
