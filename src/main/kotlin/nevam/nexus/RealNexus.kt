@@ -3,6 +3,7 @@ package nevam.nexus
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.output.TermUi.echo
 import io.reactivex.Observable
+import io.reactivex.Scheduler
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers.single
 import nevam.Pom
@@ -36,7 +37,8 @@ import nevam.nexus.network.RepositoryId
 class RealNexus(
   private val api: NexusApi,
   private val debugMode: Boolean,
-  private val config: NexusConfig
+  private val config: NexusConfig,
+  private val singleScheduler: Scheduler
 ) : Nexus {
 
   @Throws(CliktError::class)
@@ -51,8 +53,9 @@ class RealNexus(
   }
 
   override fun isMetadataPresent(repository: StagingProfileRepository, pom: Pom): Single<Boolean> {
-    return api.stagingMavenMetadata(repository.id, repositoryPath = pom.mavenDirectory(includeVersion = false))
-        .subscribeOn(single())
+    val repositoryPath = pom.coordinates.mavenDirectory(includeVersion = false)
+    return api.stagingMavenMetadata(repository.id, repositoryPath)
+        .subscribeOn(singleScheduler)
         .mapToResult()
         .map {
           when (it) {
@@ -91,7 +94,7 @@ class RealNexus(
     }
 
     return api.stagingRepository(repositoryId)
-        .subscribeOn(single())
+        .subscribeOn(singleScheduler)
         .mapToResult()
         .map {
           when (it) {
@@ -113,11 +116,11 @@ class RealNexus(
         .startWith(Checking)
         .switchMap { status ->
           if (status == WillRetry) {
-            Observables.interval(1.second, scheduler = single())
+            Observables.interval(1.second, scheduler = singleScheduler)
                 .map<StatusCheckState> { RetryingIn(nextRetryDelaySeconds - it.seconds) }
                 .startWith(WillRetry)
                 // Adding +1 to timer because a gap of 5 second means retrying on the 6th second.
-                .takeUntil(Observables.timer((nextRetryDelaySeconds + 1).seconds, single()))
+                .takeUntil(Observables.timer((nextRetryDelaySeconds + 1).seconds, singleScheduler))
                 .doOnComplete { increaseDelay() }
 
           } else {
@@ -153,8 +156,8 @@ class RealNexus(
       nextRetryDelaySeconds = (nextRetryDelaySeconds * checkConfig.backoffFactor).toLong()
     }
 
-    return api.releaseMavenMetadata(pom.mavenDirectory(includeVersion = false))
-        .subscribeOn(single())
+    return api.releaseMavenMetadata(pom.coordinates.mavenDirectory(includeVersion = false))
+        .subscribeOn(singleScheduler)
         .mapToResult()
         .map {
           when (it) {
@@ -176,11 +179,11 @@ class RealNexus(
         // TODO: share code with pollUntilClosed()?
         .switchMap { status ->
           if (status == WillRetry) {
-            Observables.interval(1.second, scheduler = single())
+            Observables.interval(1.second, scheduler = singleScheduler)
                 .map<StatusCheckState> { RetryingIn(nextRetryDelaySeconds - it.seconds) }
                 .startWith(WillRetry)
                 // Adding +1 to timer because a gap of 5 second means retrying on the 6th second.
-                .takeUntil(Observables.timer((nextRetryDelaySeconds + 1).seconds, single()))
+                .takeUntil(Observables.timer((nextRetryDelaySeconds + 1).seconds, singleScheduler))
                 .doOnComplete { increaseDelay() }
 
           } else {

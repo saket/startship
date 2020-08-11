@@ -7,10 +7,6 @@ data class Pom(val coordinates: MavenCoordinates) {
 
   /** e.g., app/cash/paparazzi/paparazzi/0.0.1 */
   fun mavenDirectory(includeVersion: Boolean): String {
-    val withoutVersion = "${groupId.replace(oldChar = '.', newChar = '/')}/$artifactId"
-    return when {
-      includeVersion -> "$withoutVersion/$version"
-      else -> withoutVersion
-    }
+    return coordinates.mavenDirectory(includeVersion)
   }
 }

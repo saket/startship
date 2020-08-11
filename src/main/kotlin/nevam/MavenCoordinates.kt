@@ -19,6 +19,15 @@ data class MavenCoordinates(
     return "$groupId:$artifactId:$version"
   }
 
+  /** e.g., app/cash/paparazzi/paparazzi/0.0.1 */
+  fun mavenDirectory(includeVersion: Boolean): String {
+    val withoutVersion = "${groupId.replace(oldChar = '.', newChar = '/')}/$artifactId"
+    return when {
+      includeVersion -> "$withoutVersion/$version"
+      else -> withoutVersion
+    }
+  }
+
   companion object {
     fun from(coordinates: String): MavenCoordinates {
       check(coordinates.count { it == ':' } == 2) {

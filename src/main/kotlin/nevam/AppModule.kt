@@ -1,6 +1,7 @@
 package nevam
 
 import io.reactivex.plugins.RxJavaPlugins
+import io.reactivex.schedulers.Schedulers
 import nevam.network.NetworkModule
 import nevam.nexus.NexusConfig
 import nevam.nexus.NexusModule
@@ -20,6 +21,7 @@ class AppModule(user: NexusUser, debugMode: Boolean, val pom: Pom) {
   val nexusRepository = RealNexus(
       api = nexusModule.nexusApi,
       debugMode = debugMode,
-      config = NexusConfig.DEFAULT
+      config = NexusConfig.DEFAULT,
+      singleScheduler = Schedulers.single()
   )
 }

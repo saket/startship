@@ -1,13 +1,11 @@
 package nevam.nexus
 
+import com.google.common.truth.Subject
 import com.google.common.truth.Truth.assertThat
-import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.TestScheduler
-import nevam.FAKE
 import nevam.util.advanceTimeBy
 import nevam.util.second
 import nevam.util.seconds
-import nevam.isInstanceOf
 import nevam.nexus.StatusCheckState.Checking
 import nevam.nexus.StatusCheckState.Done
 import nevam.nexus.StatusCheckState.GaveUp
@@ -27,12 +25,9 @@ class RealNexusTest {
   private val nexus = RealNexus(
       api = api,
       debugMode = false,
-      config = config
+      config = config,
+      singleScheduler = testScheduler
   )
-
-  init {
-    RxJavaPlugins.setSingleSchedulerHandler { testScheduler }
-  }
 
   @Test fun `poll status with gradual back-off`() {
     val repositoryId = "nicolascage"
@@ -44,7 +39,7 @@ class RealNexusTest {
     assertThat(statusValues.last()).isInstanceOf<Checking>()
 
     api.repository.onNext(
-        StagingProfileRepository.FAKE.copy(
+        FAKE_STAGING_REPO.copy(
             id = repositoryId,
             type = "open",
             isTransitioning = true
@@ -89,7 +84,7 @@ class RealNexusTest {
   @Test fun `stop polling for status after expiry time`() {
     val repositoryId = "nicolascage"
     api.repository.onNext(
-        StagingProfileRepository.FAKE.copy(
+        FAKE_STAGING_REPO.copy(
             id = repositoryId,
             type = "open",
             isTransitioning = true
@@ -110,7 +105,7 @@ class RealNexusTest {
   @Test fun `stop polling for status once repository is closed`() {
     val repositoryId = "nicolascage"
     api.repository.onNext(
-        StagingProfileRepository.FAKE.copy(
+        FAKE_STAGING_REPO.copy(
             id = repositoryId,
             type = "open",
             isTransitioning = true
@@ -125,7 +120,7 @@ class RealNexusTest {
     assertThat(statusValues).containsExactly(Checking, WillRetry)
 
     api.repository.onNext(
-        StagingProfileRepository.FAKE.copy(
+        FAKE_STAGING_REPO.copy(
             id = repositoryId,
             type = "closed",
             isTransitioning = false
@@ -138,24 +133,39 @@ class RealNexusTest {
   @Test fun `parse relative timestamp`() {
     val nowTime = Instant.ofEpochMilli(1596505477212) // Tue Aug 04 01:44:37 UTC 2020
 
-    with(StagingProfileRepository.FAKE.copy(updatedAtString = "Tue Aug 04 01:44:00 UTC 2020")) {
+    with(FAKE_STAGING_REPO.copy(updatedAtString = "Tue Aug 04 01:44:00 UTC 2020")) {
       val timestamp = timestampRelativeToNow(clock = Clock.fixed(nowTime, UTC))
       assertThat(timestamp).isEqualTo("37s ago")
     }
 
-    with(StagingProfileRepository.FAKE.copy(updatedAtString = "Tue Aug 04 01:17:19 UTC 2020")) {
+    with(FAKE_STAGING_REPO.copy(updatedAtString = "Tue Aug 04 01:17:19 UTC 2020")) {
       val timestamp = timestampRelativeToNow(clock = Clock.fixed(nowTime, UTC))
       assertThat(timestamp).isEqualTo("27m 18s ago")
     }
 
-    with(StagingProfileRepository.FAKE.copy(updatedAtString = "Mon Aug 03 14:17:19 UTC 2020")) {
+    with(FAKE_STAGING_REPO.copy(updatedAtString = "Mon Aug 03 14:17:19 UTC 2020")) {
       val timestamp = timestampRelativeToNow(clock = Clock.fixed(nowTime, UTC))
       assertThat(timestamp).isEqualTo("11h 27m ago")
     }
 
-    with(StagingProfileRepository.FAKE.copy(updatedAtString = "Sun Aug 02 01:17:19 UTC 2020")) {
+    with(FAKE_STAGING_REPO.copy(updatedAtString = "Sun Aug 02 01:17:19 UTC 2020")) {
       val timestamp = timestampRelativeToNow(clock = Clock.fixed(nowTime, UTC))
       assertThat(timestamp).isEqualTo("27m 18s ago")
     }
+  }
+
+  private inline fun <reified T> Subject.isInstanceOf() {
+    return isInstanceOf(T::class.java)
+  }
+
+  companion object {
+    val FAKE_STAGING_REPO = StagingProfileRepository(
+        id = "cagenicolas_1206",
+        type = "closed",
+        isTransitioning = false,
+        updatedAtString = "Sometime",
+        profileId = "9000",
+        profileName = "cage.nicolas"
+    )
   }
 }

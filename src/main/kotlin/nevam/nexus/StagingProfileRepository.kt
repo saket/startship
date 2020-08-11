@@ -44,8 +44,6 @@ data class StagingProfileRepository(
   val updatedAtString: String
 ) {
 
-  companion object  // for extensions.
-
   val status: Status by lazy(NONE) {
     when {
       isTransitioning -> Transitioning
@@ -59,7 +57,7 @@ data class StagingProfileRepository(
   }
 
   fun contentUrl(pom: Pom): String {
-    return "https://oss.sonatype.org/content/repositories/$id/${pom.mavenDirectory(includeVersion = true)}/"
+    return "https://oss.sonatype.org/content/repositories/$id/${pom.coordinates.mavenDirectory(includeVersion = true)}/"
   }
 
   sealed class Status(val displayValue: String) {
