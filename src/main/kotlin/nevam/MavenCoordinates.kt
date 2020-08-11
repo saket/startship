@@ -2,6 +2,7 @@ package nevam
 
 import com.github.ajalt.clikt.core.CliktError
 import nevam.util.GradleProperties
+import java.io.File
 
 data class MavenCoordinates(
   /** e.g., "app.cash.paparazzi" */
@@ -47,8 +48,10 @@ data class MavenCoordinates(
             version = properties["VERSION_NAME"]
         )
       } catch (ignored: Throwable) {
+        val filePath = File(fileName).absolutePath.replace(System.getProperty("user.home"), "~")
         throw CliktError(
-            "Error: couldn't read maven coordinates from $fileName. You can pass them manually using -c option."
+            "Error: couldn't read maven coordinates from this directory ($filePath)." +
+                " You can pass them manually using -c option."
         )
       }
     }
