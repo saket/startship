@@ -5,22 +5,14 @@ import nevam.network.NetworkModule
 import nevam.nexus.NexusConfig
 import nevam.nexus.NexusModule
 import nevam.nexus.RealNexus
-import nevam.nexus.network.MOCK_NEXUS_CONFIG
-import nevam.nexus.network.MockNexusApi
 
-class AppModule(
-  user: NexusUser,
-  debugMode: Boolean,
-  val pom: Pom
-) {
+class AppModule(user: NexusUser, debugMode: Boolean, val pom: Pom) {
   init {
     RxJavaPlugins.setErrorHandler { /* Ignored exceptions. */ }
   }
 
-  private val networkModule = NetworkModule(debugMode)
-
   private val nexusModule = NexusModule(
-      networkModule = networkModule,
+      networkModule = NetworkModule(debugMode),
       repositoryUrl = "https://oss.sonatype.org",
       user = user
   )
@@ -31,4 +23,3 @@ class AppModule(
       config = NexusConfig.DEFAULT
   )
 }
-

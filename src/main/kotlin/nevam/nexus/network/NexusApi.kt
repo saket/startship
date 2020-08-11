@@ -55,14 +55,4 @@ interface NexusApi {
     @Path("repositoryId") repositoryId: RepositoryId,
     @Path("repositoryPath", encoded = true) repositoryPath: String
   ): Single<MavenMetadata>
-
-  // https://oss.sonatype.org/service/local/repositories/releases/content/me/saket/
-  //@GET("/service/local/repositories/staging/content/{repositoryPath}/{versionName}")
-  //fun stagingRepositoryContent(
-  //  @Path("repositoryPath") repositoryPath: String,
-  //  @Path("versionName") versionName: String
-  //): Call<>
-
-  //@GET("/service/local/staging/repository/{repositoryId}/activity")
-  //fun repositoryActivity()
 }
