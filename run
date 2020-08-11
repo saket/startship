@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
 ./gradlew --quiet installDist
-./build/install/nevam/bin/nevam "$@"
+./build/install/startship/bin/startship "$@"

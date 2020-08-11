@@ -27,10 +27,10 @@ import nevam.nexus.toTableString
 import kotlin.system.exitProcess
 
 class ReleaseCommand : CliktCommand(name = "release") {
-  private val debugMode by option("-d", "--debug", help = "whether to print debug logs")
+  private val debugMode by option("-d", "--debug", help = "Whether to print debug logs")
       .flag(default = false)
 
-  private val coordinates by option("-c", "--coordinates", help = "library's maven address")
+  private val coordinates by option("-c", "--coordinates", help = "Library's maven address")
       .convert { MavenCoordinates.from(it) }
       .defaultLazy { MavenCoordinates.readFrom("gradle.properties") }
 

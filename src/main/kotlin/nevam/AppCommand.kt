@@ -11,6 +11,6 @@ fun main(args: Array<String>) {
       .main(args)
 }
 
-class AppCommand : CliktCommand() {
+class AppCommand : CliktCommand(name = "startship") {
   override fun run() = Unit
 }
