@@ -11,6 +11,7 @@ import nevam.nexus.StatusCheckState.Done
 import nevam.nexus.StatusCheckState.GaveUp
 import nevam.nexus.StatusCheckState.RetryingIn
 import nevam.nexus.StatusCheckState.WillRetry
+import nevam.util.hours
 import org.junit.Test
 import java.time.Clock
 import java.time.Instant
@@ -26,7 +27,7 @@ class RealNexusTest {
       api = api,
       debugMode = false,
       config = config,
-      singleScheduler = testScheduler
+      scheduler = testScheduler
   )
 
   @Test fun `poll status with gradual back-off`() {
@@ -45,6 +46,7 @@ class RealNexusTest {
             isTransitioning = true
         )
     )
+    testScheduler.triggerActions()
     assertThat(statusValues.last()).isInstanceOf<WillRetry>()
 
     testScheduler.advanceTimeBy(config.closedStatusCheck.initialRetryDelay)
@@ -95,7 +97,7 @@ class RealNexusTest {
         .pollUntilClosed(repositoryId)
         .test()
         .values()
-
+    testScheduler.triggerActions()
     assertThat(statusValues).containsExactly(Checking, WillRetry)
 
     testScheduler.advanceTimeBy(config.closedStatusCheck.giveUpAfter)
@@ -116,7 +118,7 @@ class RealNexusTest {
         .pollUntilClosed(repositoryId)
         .test()
         .values()
-
+    testScheduler.triggerActions()
     assertThat(statusValues).containsExactly(Checking, WillRetry)
 
     api.repository.onNext(
@@ -150,7 +152,7 @@ class RealNexusTest {
 
     with(FAKE_STAGING_REPO.copy(updatedAtString = "Sun Aug 02 01:17:19 UTC 2020")) {
       val timestamp = timestampRelativeToNow(clock = Clock.fixed(nowTime, UTC))
-      assertThat(timestamp).isEqualTo("27m 18s ago")
+      assertThat(timestamp).isEqualTo("Sun Aug 02 01:17:19 UTC 2020")
     }
   }
 

@@ -1,3 +1,5 @@
+@file:Suppress("ReactiveStreamsUnusedPublisher")
+
 package nevam.util
 
 import io.reactivex.Observable
@@ -26,18 +28,18 @@ val Int.second: Duration
   get() = Duration.ofSeconds(toLong())
 
 object Observables {
-  fun timer(delay: Duration, scheduler: Scheduler = Schedulers.computation()) =
+  fun timer(delay: Duration, scheduler: Scheduler) =
     Observable.timer(delay.toMillis(), MILLISECONDS, scheduler)
         .map { delay }!!
 
-  fun interval(period: Duration, initial: Duration = period, scheduler: Scheduler = Schedulers.computation()) =
+  fun interval(period: Duration, initial: Duration = period, scheduler: Scheduler) =
     Observable
         .interval(initial.toMillis(), period.toMillis(), MILLISECONDS, scheduler)
         .map { Duration.ofMillis(it * period.toMillis()) }!!
 }
 
-fun <T> Observable<T>.delay(period: Duration) =
-  delay(period.toMillis(), MILLISECONDS)!!
+fun <T> Observable<T>.delay(period: Duration, scheduler: Scheduler) =
+  delay(period.toMillis(), MILLISECONDS, scheduler)!!
 
 fun TestScheduler.advanceTimeBy(delayTime: Duration) {
   advanceTimeBy(delayTime.toMillis(), MILLISECONDS)

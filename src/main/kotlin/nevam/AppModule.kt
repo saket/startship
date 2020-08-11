@@ -22,6 +22,6 @@ class AppModule(user: NexusUser, debugMode: Boolean, val pom: Pom) {
       api = nexusModule.nexusApi,
       debugMode = debugMode,
       config = NexusConfig.DEFAULT,
-      singleScheduler = Schedulers.single()
+      scheduler = Schedulers.single()
   )
 }
