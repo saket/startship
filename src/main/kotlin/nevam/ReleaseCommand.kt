@@ -10,7 +10,6 @@ import com.github.ajalt.clikt.parameters.options.option
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.blockingSubscribeBy
 import nevam.clikt.UserInput
-import nevam.util.hour
 import nevam.nexus.Nexus
 import nevam.nexus.StagingProfileRepository
 import nevam.nexus.StagingProfileRepository.Status.Closed
@@ -24,6 +23,9 @@ import nevam.nexus.StatusCheckState.GaveUp
 import nevam.nexus.StatusCheckState.RetryingIn
 import nevam.nexus.StatusCheckState.WillRetry
 import nevam.nexus.toTableString
+import nevam.util.hour
+import nevam.util.stacktraceToString
+import org.jline.terminal.TerminalBuilder.terminal
 import kotlin.system.exitProcess
 
 class ReleaseCommand : CliktCommand(name = "release") {
@@ -181,7 +183,7 @@ class ReleaseCommand : CliktCommand(name = "release") {
             is RetryingIn -> "Checking again in ${it.secondsRemaining}s..."
             is Done -> "Available now. Go ahead and announce ${pom.artifactId}:${pom.version} to public!"
             is GaveUp -> {
-              val emptyLineForCoveringLastEcho = Array(MAX_LINE_LENGTH) { " " }.joinToString(separator = "")
+              val emptyLineForCoveringLastEcho = Array(terminalWidth()) { " " }.joinToString(separator = "")
               val timeSpent = when {
                 it.after >= 1.hour -> "${it.after.toHours()} hours"
                 else -> "${it.after.toMinutes()} minutes"
@@ -201,13 +203,14 @@ class ReleaseCommand : CliktCommand(name = "release") {
         onError = {
           echoNewLine()
           echo("Error: ${it.message}", err = true)
+          if (debugMode) {
+            echo(it.stacktraceToString())
+          }
           exitProcess(1)
         },
-        // '\r' moves the cursor to the beginning of the line so
-        // that the status message can be updated on the same line.
         onNext = {
           // The line should be long enough to cover all characters of the last line.
-          echo("\r${it.padEnd(MAX_LINE_LENGTH, padChar = ' ')}", trailingNewline = false)
+          echo("\r${it.padEnd(terminalWidth(), padChar = ' ')}", trailingNewline = false)
         },
         onComplete = { echoNewLine(); echoNewLine() }
     )
@@ -228,4 +231,4 @@ class ReleaseCommand : CliktCommand(name = "release") {
 }
 
 private fun Unit.exhaustive(): Any = this
-private const val MAX_LINE_LENGTH = 100
+private fun terminalWidth() = terminal().width
