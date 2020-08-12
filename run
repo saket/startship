@@ -1,4 +1,3 @@
 #!/usr/bin/env bash
 
-./gradlew --quiet installDist
-./build/install/startship/bin/startship "$@"
+./gradlew --quiet installDist && ./build/install/startship/bin/startship "$@"

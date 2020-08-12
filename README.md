@@ -13,6 +13,29 @@ $ startship release && say "released"
 
 `startship` will find your staged repository, request it to be closed, wait till it's closed, promote it to release, and finally wait till it's synced to maven central. It also tries to be helpful by making sure you don't release an incorrect artifact by comparing maven coordinates and versions.
 
+### Contributing and running locally
+
+Sonatype's endpoints are badly documented and can be really flaky at times, causing `startship` to fail. If you run into issues, please consider sending a PR. For your local development, `startship` can be run modified to run in mock mode:
+
+
+```diff
+ // AppModule.kt
+ val nexusRepository = RealNexus(
+-  api = nexusModule.nexusApi,
++  api = MockNexusApi(pom),
+   debugMode = debugMode,
+-  config = NexusConfig.DEFAULT,
++  config = MOCK_NEXUS_CONFIG,
+   scheduler = Schedulers.single()
+ )
+```
+
+Next, run `startship` using:
+
+```
+./run release -c com.example:nicolascage:4.2.0
+```
+
 ### License
 
 ```
