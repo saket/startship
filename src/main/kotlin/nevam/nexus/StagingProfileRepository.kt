@@ -1,6 +1,7 @@
 package nevam.nexus
 
-import com.jakewharton.fliptables.FlipTable
+import com.jakewharton.picnic.renderText
+import com.jakewharton.picnic.table
 import com.squareup.moshi.Json
 import nevam.Pom
 import nevam.nexus.StagingProfileRepository.Status.Closed
@@ -71,21 +72,31 @@ data class StagingProfileRepository(
 
 fun Collection<StagingProfileRepository>.toTableString(): String {
   val printRowNumber = size > 1
-
-  val headers = mutableListOf("Profile name", "Repository ID", "Status", "Update time")
-  if (printRowNumber) {
-    headers.add(0, "")
-  }
-
-  val rows = mapIndexed { index, repo ->
-    val row = mutableListOf(repo.profileName, repo.id, repo.status.displayValue, repo.timestampRelativeToNow())
-    if (printRowNumber) {
-      row.add(0, "${index + 1}")
+  val table = table {
+    cellStyle {
+      border = true
+      paddingLeft = 1
+      paddingRight = 1
     }
-    row.toTypedArray()
+    row {
+      if (printRowNumber) {
+        cell("") {
+          borderTop = false
+          borderLeft = false
+        }
+      }
+      cells("Profile name", "Repository ID", "Status", "Update time")
+    }
+    mapIndexed { index, repo ->
+      row {
+        if (printRowNumber) {
+          cell(index)
+        }
+        cells(repo.profileName, repo.id, repo.status.displayValue, repo.timestampRelativeToNow())
+      }
+    }
   }
-
-  return FlipTable.of(headers.toTypedArray(), rows.toTypedArray())
+  return table.renderText()
 }
 
 fun StagingProfileRepository.timestampRelativeToNow(clock: Clock = Clock.systemUTC()): String {
