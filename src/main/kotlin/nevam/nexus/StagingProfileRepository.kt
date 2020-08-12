@@ -90,7 +90,7 @@ fun Collection<StagingProfileRepository>.toTableString(): String {
     mapIndexed { index, repo ->
       row {
         if (printRowNumber) {
-          cell(index)
+          cell(index + 1)
         }
         cells(repo.profileName, repo.id, repo.status.displayValue, repo.timestampRelativeToNow())
       }

@@ -45,9 +45,9 @@ class StagingProfileRepositoryTest {
       |    ┌──────────────┬──────────────────┬────────┬──────────────────────────────┐
       |    │ Profile name │ Repository ID    │ Status │ Update time                  │
       |┌───┼──────────────┼──────────────────┼────────┼──────────────────────────────┤
-      |│ 0 │ cage.nicolas │ cagenicolas_1206 │ Closed │ Tue Aug 04 01:17:19 UTC 2020 │
+      |│ 1 │ cage.nicolas │ cagenicolas_1206 │ Closed │ Tue Aug 04 01:17:19 UTC 2020 │
       |├───┼──────────────┼──────────────────┼────────┼──────────────────────────────┤
-      |│ 1 │ cage.nicolas │ cagenicolas_1207 │ Open   │ Sun Aug 02 11:23:52 UTC 2020 │
+      |│ 2 │ cage.nicolas │ cagenicolas_1207 │ Open   │ Sun Aug 02 11:23:52 UTC 2020 │
       |└───┴──────────────┴──────────────────┴────────┴──────────────────────────────┘
       |""".trimMargin())
   }
