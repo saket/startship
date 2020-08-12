@@ -18,7 +18,7 @@ class AppModule(user: NexusUser, debugMode: Boolean, val pom: Pom) {
       user = user
   )
 
-  val nexusRepository = RealNexus(
+  val nexus = RealNexus(
       api = nexusModule.nexusApi,
       debugMode = debugMode,
       config = NexusConfig.DEFAULT,

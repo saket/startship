@@ -45,7 +45,7 @@ class ReleaseCommand : CliktCommand(name = "release") {
   }
 
   private val input: UserInput = UserInput(defaultCliktConsole())
-  private val nexus: Nexus get() = appModule.nexusRepository
+  private val nexus: Nexus get() = appModule.nexus
   private val pom: Pom get() = appModule.pom
 
   override fun run() {

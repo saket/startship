@@ -9,18 +9,18 @@ $ cd ~/path/to/your/library/project
 $ startship release && say "released"
 ```
 
-`startship` makes the process of releasing Android libraries _a bit_ easier by automating usage of Sonatype Nexus so that you don't have to constantly refresh your browser after every operation to check if has gone through yet. 
+`startship` makes the process of releasing JVM libraries _a bit_ easier by automating usage of Sonatype Nexus so that you don't have to constantly refresh your browser after every operation to check if has gone through yet. 
 
-`startship` will find your staged repository, request it to be closed, wait till it's closed, promote it to release, and finally wait till it's synced to maven central. It also tries to be helpful by making sure you don't release an incorrect artifact by comparing maven coordinates and versions.
+`startship` will read your library's maven coordinates from `gradle.properties`, find your staged repository, request it to be closed, wait till it's closed, promote it to release, and finally wait till it's synced to maven central. It also tries to be helpful by making sure you don't release an incorrect artifact by comparing maven coordinates and versions.
 
 ### Contributing and running locally
 
-Sonatype's endpoints are badly documented and can be really flaky at times, causing `startship` to fail. If you run into issues, please consider sending a PR. For your local development, `startship` can be run modified to run in mock mode:
+Sonatype's endpoints are badly documented and can be really flaky at times, causing `startship` to fail. If you run into issues, please consider [sending a PR](https://github.com/saket/startship/pulls). For your local development, `startship` can be modified to run in mock mode:
 
 
 ```diff
  // AppModule.kt
- val nexusRepository = RealNexus(
+ val nexus = RealNexus(
 -  api = nexusModule.nexusApi,
 +  api = MockNexusApi(pom),
    debugMode = debugMode,
