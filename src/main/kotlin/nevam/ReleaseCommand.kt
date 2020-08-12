@@ -160,7 +160,7 @@ class ReleaseCommand : CliktCommand(name = "release") {
         """.trimMargin()
     )
     echoNewLine()
-    input.confirm("Proceed to release? 🚀", default = true, abort = true)
+    input.confirm("Proceed to release? 🚢", default = true, abort = true)
 
     echoNewLine()
     echo("Jumping into hyperspace... ", trailingNewline = false)
