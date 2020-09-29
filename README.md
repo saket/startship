@@ -25,6 +25,9 @@ Alternatively, you can provide the Maven coordinates with the `-c` option:
 $ startship release -c com.example:nicolascage:4.2.0
 ```
 
+Additionally, your machine's `gradle.properties` must include values for `SONATYPE_NEXUS_USERNAME`
+and `SONATYPE_NEXUS_PASSWORD` to perform operations in your Sonatype Nexus account.
+
 ### Contributing and running locally
 
 Sonatype's endpoints are badly documented and can be really flaky at times, causing `startship` to fail. If you run into issues, please consider [sending a PR](https://github.com/saket/startship/pulls). For your local development, `startship` can be modified to run in mock mode:
