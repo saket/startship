@@ -51,7 +51,7 @@ data class MavenCoordinates(
         val filePath = File(fileName).absolutePath.replace(System.getProperty("user.home"), "~")
         throw CliktError(
             "Error: couldn't read maven coordinates from this directory ($filePath)." +
-                " You can pass them manually using -c option."
+                " You can pass them manually using -c option: `-c group:artifact:version`"
         )
       }
     }
