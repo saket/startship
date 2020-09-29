@@ -13,6 +13,18 @@ $ startship release && say "released"
 
 `startship` will read your library's maven coordinates from `gradle.properties`, find your staged repository, request it to be closed, wait till it's closed, promote it to release, and finally wait till it's synced to maven central. It also tries to be helpful by making sure you don't release an incorrect artifact by comparing maven coordinates and versions.
 
+The following Gradle properties are expected in `gradle.properties`:
+```properties
+GROUP=com.example
+POM_ARTIFACT_ID=nicolascage
+VERSION_NAME=4.2.0
+```
+
+Alternatively, you can provide the Maven coordinates with the `-c` option:
+```shell script
+$ startship release -c com.example:nicolascage:4.2.0
+```
+
 ### Contributing and running locally
 
 Sonatype's endpoints are badly documented and can be really flaky at times, causing `startship` to fail. If you run into issues, please consider [sending a PR](https://github.com/saket/startship/pulls). For your local development, `startship` can be modified to run in mock mode:
