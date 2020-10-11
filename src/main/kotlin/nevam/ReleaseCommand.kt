@@ -4,6 +4,7 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.CliktError
 import com.github.ajalt.clikt.output.defaultCliktConsole
 import com.github.ajalt.clikt.parameters.options.convert
+import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.defaultLazy
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
@@ -36,9 +37,19 @@ class ReleaseCommand : CliktCommand(name = "release") {
       .convert { MavenCoordinates.from(it) }
       .defaultLazy { MavenCoordinates.readFrom("gradle.properties") }
 
+  private val usernameProperty by option(
+      "-u", "--username",
+      help = "Global Gradle property defining the Sonatype Nexus username"
+  ).default(NexusUser.DEFAULT_USERNAME_PROPERTY)
+
+  private val passwordProperty by option(
+      "-p", "--password",
+      help = "Global Gradle property defining the Sonatype Nexus password"
+  ).default(NexusUser.DEFAULT_PASSWORD_PROPERTY)
+
   private val appModule by lazy {
     AppModule(
-        user = NexusUser.readFrom("~/.gradle/gradle.properties"),
+        user = NexusUser.readFrom("~/.gradle/gradle.properties", usernameProperty, passwordProperty),
         debugMode = debugMode,
         pom = Pom(coordinates)
     )
