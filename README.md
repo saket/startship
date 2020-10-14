@@ -13,7 +13,7 @@ $ startship release && say "released"
 
 `startship` will read your library's maven coordinates from `gradle.properties`, find your staged repository, request it to be closed, wait till it's closed, promote it to release, and finally wait till it's synced to maven central. It also tries to be helpful by making sure you don't release an incorrect artifact by comparing maven coordinates and versions.
 
-The following Gradle properties are expected in `gradle.properties`:
+The following Gradle properties are expected in the project's `gradle.properties`:
 ```properties
 GROUP=com.example
 POM_ARTIFACT_ID=nicolascage
@@ -25,8 +25,18 @@ Alternatively, you can provide the Maven coordinates with the `-c` option:
 $ startship release -c com.example:nicolascage:4.2.0
 ```
 
-Additionally, your machine's `gradle.properties` must include values for `SONATYPE_NEXUS_USERNAME`
-and `SONATYPE_NEXUS_PASSWORD` to perform operations in your Sonatype Nexus account.
+Additionally, the following properties are needed in your machine's `gradle.properties` to perform operations with your
+Sonatype Nexus account:
+```properties
+SONATYPE_NEXUS_USERNAME=username
+SONATYPE_NEXUS_PASSWORD=password
+```
+
+Alternatively, you can provide these to the command line with the `-u` and `-p` options, respectively. The values passed
+to `-u` and `-p` can be either Gradle property keys or the actual username or password values.
+```shell script
+$ startship release -u yourActualUsername -p YOUR_PASSWORD_GRADLE_PROPERTY
+```
 
 ### Contributing and running locally
 
