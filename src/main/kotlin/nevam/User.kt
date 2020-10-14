@@ -6,12 +6,15 @@ data class NexusUser(val username: String, val password: String) {
   companion object {
     fun readFrom(
         fileName: String,
-        usernameProperty: String = DEFAULT_USERNAME_PROPERTY, passwordProperty: String = DEFAULT_PASSWORD_PROPERTY
+        username: String = DEFAULT_USERNAME_PROPERTY,
+        password: String = DEFAULT_PASSWORD_PROPERTY
     ): NexusUser {
       val properties = GradleProperties(fileName)
+      val actualUsername = if (username in properties) properties[username] else username
+      val actualPassword = if (password in properties) properties[password] else password
       return NexusUser(
-          username = properties[usernameProperty],
-          password = properties[passwordProperty]
+          username = actualUsername,
+          password = actualPassword
       )
     }
 

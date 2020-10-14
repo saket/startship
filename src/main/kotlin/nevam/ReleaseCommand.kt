@@ -37,19 +37,19 @@ class ReleaseCommand : CliktCommand(name = "release") {
       .convert { MavenCoordinates.from(it) }
       .defaultLazy { MavenCoordinates.readFrom("gradle.properties") }
 
-  private val usernameProperty by option(
+  private val username by option(
       "-u", "--username",
-      help = "Global Gradle property defining the Sonatype Nexus username"
+      help = "The Sonatype Nexus username to use, or a global Gradle property defining it"
   ).default(NexusUser.DEFAULT_USERNAME_PROPERTY)
 
-  private val passwordProperty by option(
+  private val password by option(
       "-p", "--password",
-      help = "Global Gradle property defining the Sonatype Nexus password"
+      help = "The Sonatype Nexus password to use, or a global Gradle property defining it"
   ).default(NexusUser.DEFAULT_PASSWORD_PROPERTY)
 
   private val appModule by lazy {
     AppModule(
-        user = NexusUser.readFrom("~/.gradle/gradle.properties", usernameProperty, passwordProperty),
+        user = NexusUser.readFrom("~/.gradle/gradle.properties", username, password),
         debugMode = debugMode,
         pom = Pom(coordinates)
     )

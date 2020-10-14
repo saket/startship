@@ -10,6 +10,9 @@ class GradleProperties(fileName: String) {
     file.bufferedReader().use { load(it) }
   }
 
+  operator fun contains(key: String): Boolean =
+      javaProperties.containsKey(key)
+
   operator fun get(key: String): String =
     javaProperties.getProperty(key)
         ?: throw CliktError("Error: $key not found in ${file.absolutePath}")
