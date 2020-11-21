@@ -7,7 +7,8 @@ import nevam.nexus.NexusConfig
 import nevam.nexus.NexusModule
 import nevam.nexus.RealNexus
 
-class AppModule(user: NexusUser, debugMode: Boolean, val pom: Pom) {
+class AppModule(user: NexusUser, debugMode: Boolean, val poms: List<Pom>) {
+
   init {
     RxJavaPlugins.setErrorHandler { /* Ignored exceptions. */ }
   }

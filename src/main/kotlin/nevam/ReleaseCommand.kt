@@ -48,19 +48,28 @@ class ReleaseCommand : CliktCommand(name = "release") {
   ).default(NexusUser.DEFAULT_PASSWORD_PROPERTY)
 
   private val appModule by lazy {
+    val pomFromCoordinates = Pom(coordinates)
+    val poms = if (pomFromCoordinates.artifactId.contains(',')) {
+      val artifactIds = pomFromCoordinates.artifactId.split(',')
+      List(artifactIds.size) {
+        Pom(MavenCoordinates(pomFromCoordinates.groupId, artifactIds[it], pomFromCoordinates.version))
+      }
+    } else {
+      listOf(pomFromCoordinates)
+    }
     AppModule(
         user = NexusUser.readFrom("~/.gradle/gradle.properties", username, password),
         debugMode = debugMode,
-        pom = Pom(coordinates)
+        poms = poms
     )
   }
 
   private val input: UserInput = UserInput(defaultCliktConsole())
   private val nexus: Nexus get() = appModule.nexus
-  private val pom: Pom get() = appModule.pom
+  private val poms: List<Pom> get() = appModule.poms
 
   override fun run() {
-    echo("Preparing to release ${pom.coordinates}")
+    echo("Preparing to release $coordinates")
     echoNewLine()
     echo("Fetching staged repositories...")
     val repositories = nexus.stagingRepositories()
@@ -123,12 +132,14 @@ class ReleaseCommand : CliktCommand(name = "release") {
   }
 
   private fun validate(repository: StagingProfileRepository) {
-    val isMetadataPresent = nexus.isMetadataPresent(repository, pom).blockingGet()
-    if (!isMetadataPresent) {
-      echoNewLine()
-      echo("Error: ${repository.id}'s maven coordinates don't match ${pom.coordinates}.")
-      echo("Check if you uploaded an incorrect archive: https://oss.sonatype.org/#stagingRepositories.")
-      throw CliktError("Aborted!")
+    poms.forEach { pom ->
+      val isMetadataPresent = nexus.isMetadataPresent(repository, pom).blockingGet()
+      if (!isMetadataPresent) {
+        echoNewLine()
+        echo("Error: ${repository.id}'s maven coordinates don't match ${pom.coordinates}.")
+        echo("Check if you uploaded an incorrect archive: https://oss.sonatype.org/#stagingRepositories.")
+        throw CliktError("Aborted!")
+      }
     }
   }
 
@@ -165,10 +176,11 @@ class ReleaseCommand : CliktCommand(name = "release") {
   }
 
   private fun release(repository: StagingProfileRepository) {
+    val pom = poms[0]
     val contentUrl = repository.contentUrl(pom)
     echo(
         """
-          |The contents of ${pom.artifactId} ${pom.version} (${repository.id}) can be verified here before it's released: 
+          |The contents of ${pom.groupId} ${pom.version} (${repository.id}) can be verified here before it's released: 
           |$contentUrl
         """.trimMargin()
     )
@@ -185,6 +197,7 @@ class ReleaseCommand : CliktCommand(name = "release") {
   }
 
   private fun waitTillAvailable(): Observable<String> {
+    val pom = poms[0]
     return nexus.pollUntilSyncedToMavenCentral(pom)
         .doAfterNext { if (it is GaveUp) exitProcess(1) }
         .map {

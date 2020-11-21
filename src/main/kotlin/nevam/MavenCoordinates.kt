@@ -22,11 +22,16 @@ data class MavenCoordinates(
 
   /** e.g., app/cash/paparazzi/paparazzi/0.0.1 */
   fun mavenDirectory(includeVersion: Boolean): String {
-    val withoutVersion = "${groupId.replace(oldChar = '.', newChar = '/')}/$artifactId"
+    val withoutVersion = "${mavenGroupDirectory()}/$artifactId"
     return when {
       includeVersion -> "$withoutVersion/$version"
       else -> withoutVersion
     }
+  }
+
+  /** e.g., app/cash/paparazzi */
+  fun mavenGroupDirectory(): String {
+    return groupId.replace(oldChar = '.', newChar = '/')
   }
 
   companion object {
