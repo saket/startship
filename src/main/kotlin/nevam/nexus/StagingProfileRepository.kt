@@ -58,7 +58,7 @@ data class StagingProfileRepository(
   }
 
   fun contentUrl(pom: Pom): String {
-    return "https://oss.sonatype.org/content/repositories/$id/${pom.coordinates.mavenDirectory(includeVersion = true)}/"
+    return "https://oss.sonatype.org/content/repositories/$id/${pom.coordinates.mavenGroupDirectory()}/"
   }
 
   sealed class Status(val displayValue: String) {
