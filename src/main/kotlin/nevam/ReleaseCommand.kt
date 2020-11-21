@@ -49,13 +49,9 @@ class ReleaseCommand : CliktCommand(name = "release") {
 
   private val appModule by lazy {
     val pomFromCoordinates = Pom(coordinates)
-    val poms = if (pomFromCoordinates.artifactId.contains(',')) {
-      val artifactIds = pomFromCoordinates.artifactId.split(',')
-      List(artifactIds.size) {
-        Pom(MavenCoordinates(pomFromCoordinates.groupId, artifactIds[it], pomFromCoordinates.version))
-      }
-    } else {
-      listOf(pomFromCoordinates)
+    val artifactIds = pomFromCoordinates.artifactId.split(',')
+    val poms = List(artifactIds.size) { index ->
+      Pom(MavenCoordinates(pomFromCoordinates.groupId, artifactIds[index], pomFromCoordinates.version))
     }
     AppModule(
         user = NexusUser.readFrom("~/.gradle/gradle.properties", username, password),
