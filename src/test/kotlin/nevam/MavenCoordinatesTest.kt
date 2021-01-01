@@ -23,6 +23,7 @@ class MavenCoordinatesTest {
     val coordinates = MavenCoordinates.from("com.squareup.sqldelight:runtime:1.4.0")
     assertThat(coordinates.mavenDirectory(includeVersion = false)).isEqualTo("com/squareup/sqldelight/runtime")
     assertThat(coordinates.mavenDirectory(includeVersion = true)).isEqualTo("com/squareup/sqldelight/runtime/1.4.0")
+    assertThat(coordinates.mavenGroupDirectory()).isEqualTo("com/squareup/sqldelight")
   }
 
   @Test fun `read properties from file with all properties succeeds`() {
