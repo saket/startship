@@ -20,9 +20,14 @@ POM_ARTIFACT_ID=nicolascage
 VERSION_NAME=4.2.0
 ```
 
-Alternatively, you can provide the Maven coordinates with the `-c` option:
+Alternatively, you can provide the Maven coordinates with the `-c` option. If you'd like to verify multiple artifacts
+are released with the same group and version, the artifacts can be comma-delimited.
 ```shell script
+# Single artifact:
 $ startship release -c com.example:nicolascage:4.2.0
+
+# Multiple artifacts
+$ startship release -c com.example:nicolascage,dianekruger:4.2.0
 ```
 
 Additionally, the following properties are needed in your machine's `gradle.properties` to perform operations with your
