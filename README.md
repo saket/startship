@@ -68,6 +68,11 @@ Next, run `startship` using:
 ./run release -c com.example:nicolascage:4.2.0
 ```
 
+### Releasing
+1. Draft a changelog.
+2. Run `./gradlew clean distZip` and attach `build/distributions/startship.zip` to a new GitHub release.
+3. Update the [homebrew formula](https://github.com/saket/homebrew-repo/blob/master/Formula/startship.rb) with a link to the uploaded `startship.zip` archive. A `sha256` checksum of the archive can be created by running `sha256sum` on the command line.
+
 ### License
 
 ```
