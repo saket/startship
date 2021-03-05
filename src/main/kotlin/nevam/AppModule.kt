@@ -7,15 +7,15 @@ import nevam.nexus.NexusConfig
 import nevam.nexus.NexusModule
 import nevam.nexus.RealNexus
 
-class AppModule(user: NexusUser, debugMode: Boolean, val poms: List<Pom>) {
+class AppModule(user: NexusUser, debugMode: Boolean, val poms: List<Pom>, hostPrefix: String = "") {
 
   init {
     RxJavaPlugins.setErrorHandler { /* Ignored exceptions. */ }
   }
 
-  private val nexusModule = NexusModule(
+  internal val nexusModule = NexusModule(
       networkModule = NetworkModule(debugMode),
-      repositoryUrl = "https://oss.sonatype.org",
+      repositoryUrl = "https://${if (hostPrefix.isEmpty()) "" else "$hostPrefix."}oss.sonatype.org",
       user = user
   )
 

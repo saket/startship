@@ -1,14 +1,14 @@
 package nevam.nexus
 
-import nevam.network.NetworkModule
 import nevam.NexusUser
+import nevam.network.NetworkModule
 import nevam.nexus.network.NexusApi
 import okhttp3.Credentials
 import okhttp3.Interceptor
 
 class NexusModule(
   networkModule: NetworkModule,
-  repositoryUrl: String,
+  internal val repositoryUrl: String,
   user: NexusUser
 ) {
   private val authInterceptor = Interceptor { chain ->

@@ -12,6 +12,7 @@ import io.reactivex.Observable
 import io.reactivex.rxkotlin.blockingSubscribeBy
 import nevam.clikt.UserInput
 import nevam.nexus.Nexus
+import nevam.nexus.NexusModule
 import nevam.nexus.StagingProfileRepository
 import nevam.nexus.StagingProfileRepository.Status.Closed
 import nevam.nexus.StagingProfileRepository.Status.Open
@@ -47,6 +48,11 @@ class ReleaseCommand : CliktCommand(name = "release") {
       help = "The Sonatype Nexus password to use, or a global Gradle property defining it"
   ).default(NexusUser.DEFAULT_PASSWORD_PROPERTY)
 
+  private val hostPrefix by option(
+    "--host",
+    help = "The prefix to insert before 'oss.sonatype.org', e.g. 's01'"
+  ).default("")
+
   private val appModule by lazy {
     val pomFromCoordinates = Pom(coordinates)
     val artifactIds = pomFromCoordinates.artifactId.split(',')
@@ -56,7 +62,8 @@ class ReleaseCommand : CliktCommand(name = "release") {
     AppModule(
         user = NexusUser.readFrom("~/.gradle/gradle.properties", username, password),
         debugMode = debugMode,
-        poms = poms
+        poms = poms,
+        hostPrefix = hostPrefix
     )
   }
 
@@ -133,7 +140,7 @@ class ReleaseCommand : CliktCommand(name = "release") {
       if (!isMetadataPresent) {
         echoNewLine()
         echo("Error: ${repository.id}'s maven coordinates don't match ${pom.coordinates}.")
-        echo("Check if you uploaded an incorrect archive: https://oss.sonatype.org/#stagingRepositories.")
+        echo("Check if you uploaded an incorrect archive: ${appModule.nexusModule.repositoryUrl}/#stagingRepositories.")
         throw CliktError("Aborted!")
       }
     }
@@ -173,7 +180,7 @@ class ReleaseCommand : CliktCommand(name = "release") {
 
   private fun release(repository: StagingProfileRepository) {
     val pom = poms[0]
-    val contentUrl = repository.contentUrl(pom)
+    val contentUrl = appModule.nexusModule.contentUrl(repository, pom)
     echo(
         """
           |The contents of ${pom.groupId} ${pom.version} (${repository.id}) can be verified here before it's released: 
@@ -191,6 +198,9 @@ class ReleaseCommand : CliktCommand(name = "release") {
     echo("Checking with Maven Central if it's available yet (can take an hour or two)...")
     waitTillAvailable().echoStreamingProgress()
   }
+
+  private fun NexusModule.contentUrl(repository: StagingProfileRepository, pom: Pom) =
+    "$repositoryUrl/content/repositories/${repository.id}/${pom.coordinates.mavenGroupDirectory()}"
 
   private fun waitTillAvailable(): Observable<String> {
     val pom = poms[0]
@@ -243,7 +253,7 @@ class ReleaseCommand : CliktCommand(name = "release") {
       echo("Job's done.")
 
     } catch (e: Throwable) {
-      echo("Failed. You can try doing it manually at https://oss.sonatype.org/#stagingRepositories")
+      echo("Failed. You can try doing it manually at ${appModule.nexusModule.repositoryUrl}/#stagingRepositories")
     }
   }
 
