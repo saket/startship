@@ -1,6 +1,7 @@
 package nevam.nexus
 
 import nevam.NexusUser
+import nevam.Pom
 import nevam.network.NetworkModule
 import nevam.nexus.network.NexusApi
 import okhttp3.Credentials
@@ -39,3 +40,6 @@ class NexusModule(
       .build()
       .create(NexusApi::class.java)
 }
+
+internal fun NexusModule.contentUrl(repository: StagingProfileRepository, pom: Pom) =
+  "$repositoryUrl/content/repositories/${repository.id}/${pom.coordinates.mavenGroupDirectory()}"

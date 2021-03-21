@@ -12,7 +12,6 @@ import io.reactivex.Observable
 import io.reactivex.rxkotlin.blockingSubscribeBy
 import nevam.clikt.UserInput
 import nevam.nexus.Nexus
-import nevam.nexus.NexusModule
 import nevam.nexus.StagingProfileRepository
 import nevam.nexus.StagingProfileRepository.Status.Closed
 import nevam.nexus.StagingProfileRepository.Status.Open
@@ -24,6 +23,7 @@ import nevam.nexus.StatusCheckState.Done
 import nevam.nexus.StatusCheckState.GaveUp
 import nevam.nexus.StatusCheckState.RetryingIn
 import nevam.nexus.StatusCheckState.WillRetry
+import nevam.nexus.contentUrl
 import nevam.nexus.toTableString
 import nevam.util.hour
 import nevam.util.stacktraceToString
@@ -198,9 +198,6 @@ class ReleaseCommand : CliktCommand(name = "release") {
     echo("Checking with Maven Central if it's available yet (can take an hour or two)...")
     waitTillAvailable().echoStreamingProgress()
   }
-
-  private fun NexusModule.contentUrl(repository: StagingProfileRepository, pom: Pom) =
-    "$repositoryUrl/content/repositories/${repository.id}/${pom.coordinates.mavenGroupDirectory()}"
 
   private fun waitTillAvailable(): Observable<String> {
     val pom = poms[0]
