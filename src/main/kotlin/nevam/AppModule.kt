@@ -28,10 +28,11 @@ class AppModule(user: NexusUser, debugMode: Boolean, val poms: List<Pom>, hostPr
 
   private companion object {
     private fun repositoryUrl(hostPrefix: String): String {
-      val actualPrefix = if (hostPrefix.isEmpty())
+      val actualPrefix = if (hostPrefix.isEmpty()) {
         ""
-      else
+      } else {
         "$hostPrefix."
+      }
       return "https://${actualPrefix}oss.sonatype.org"
     }
   }
