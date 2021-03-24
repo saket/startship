@@ -1,14 +1,15 @@
 package nevam.nexus
 
-import nevam.network.NetworkModule
 import nevam.NexusUser
+import nevam.Pom
+import nevam.network.NetworkModule
 import nevam.nexus.network.NexusApi
 import okhttp3.Credentials
 import okhttp3.Interceptor
 
 class NexusModule(
   networkModule: NetworkModule,
-  repositoryUrl: String,
+  internal val repositoryUrl: String,
   user: NexusUser
 ) {
   private val authInterceptor = Interceptor { chain ->
@@ -39,3 +40,6 @@ class NexusModule(
       .build()
       .create(NexusApi::class.java)
 }
+
+internal fun NexusModule.contentUrl(repository: StagingProfileRepository, pom: Pom) =
+  "$repositoryUrl/content/repositories/${repository.id}/${pom.coordinates.mavenGroupDirectory()}"

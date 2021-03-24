@@ -3,7 +3,6 @@ package nevam.nexus
 import com.jakewharton.picnic.renderText
 import com.jakewharton.picnic.table
 import com.squareup.moshi.Json
-import nevam.Pom
 import nevam.nexus.StagingProfileRepository.Status.Closed
 import nevam.nexus.StagingProfileRepository.Status.Open
 import nevam.nexus.StagingProfileRepository.Status.Released
@@ -55,10 +54,6 @@ data class StagingProfileRepository(
         else -> Unknown(type)
       }
     }
-  }
-
-  fun contentUrl(pom: Pom): String {
-    return "https://oss.sonatype.org/content/repositories/$id/${pom.coordinates.mavenGroupDirectory()}/"
   }
 
   sealed class Status(val displayValue: String) {
