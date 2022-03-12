@@ -207,7 +207,7 @@ class RealNexus(
   }
 
   private fun genericApiError(result: Failure): CliktError {
-    if (debugMode) echo(result.error.stacktraceToString())
+    if (debugMode && result.error != null) echo(result.error.stacktraceToString())
     return CliktError("Failed to connect to nexus (${result.error})")
   }
 

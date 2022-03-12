@@ -15,7 +15,13 @@ import java.io.IOException
 
 fun <T : Any> Call<T>.executeAsResult(): ApiResult<T> {
   return try {
-    Success(execute().body())
+    val response = execute()
+    if (response.isSuccessful) {
+      Success(response.body())
+    } else {
+      response.code()
+      Failure(type = httpCodeToFailureType(response.code()), error = null)
+    }
   } catch (e: Throwable) {
     Failure(e, e.type())
   }
@@ -29,11 +35,15 @@ fun <T : Any> Single<T>.mapToResult(): Single<ApiResult<T>> {
 private fun Throwable.type(): Failure.Type {
   return when (this) {
     is IOException -> Network
-    is HttpException -> when {
-      code() == 401 -> UserAuth
-      code() == 404 -> NotFound
-      else -> Server
-    }
+    is HttpException -> httpCodeToFailureType(code())
     else -> Unknown
+  }
+}
+
+private fun httpCodeToFailureType(code: Int): Failure.Type {
+  return when (code) {
+    401 -> UserAuth
+    404 -> NotFound
+    else -> Server
   }
 }
