@@ -54,7 +54,7 @@ Sonatype's endpoints are badly documented and can be really flaky at times, caus
  // AppModule.kt
  val nexus = RealNexus(
 -  api = nexusModule.nexusApi,
-+  api = MockNexusApi(pom),
++  api = MockNexusApi(pom = ...),
    debugMode = debugMode,
 -  config = NexusConfig.DEFAULT,
 +  config = MOCK_NEXUS_CONFIG,
