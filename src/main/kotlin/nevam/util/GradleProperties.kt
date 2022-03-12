@@ -6,14 +6,17 @@ import java.util.Properties
 
 class GradleProperties(fileName: String) {
   private val file = File(fileName.replace("~", System.getProperty("user.home")))
+
   private val javaProperties = Properties().apply {
-    file.bufferedReader().use { load(it) }
+    if (file.exists()) {
+      file.bufferedReader().use { load(it) }
+    }
   }
 
   operator fun contains(key: String): Boolean =
-      javaProperties.containsKey(key)
+    javaProperties.containsKey(key)
 
   operator fun get(key: String): String =
     javaProperties.getProperty(key)
-        ?: throw CliktError("Error: $key not found in ${file.absolutePath}")
+      ?: throw CliktError("Error: $key not found in ${file.absolutePath}")
 }
