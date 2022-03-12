@@ -17,8 +17,7 @@ repositories {
 mainClassName = 'nevam.App'
 
 dependencies {
-  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-  implementation "com.github.ajalt:clikt:2.8.0"
+  implementation "com.github.ajalt.clikt:clikt:3.4.0"
   implementation "com.squareup.retrofit2:retrofit:$versions.retrofit"
   implementation "com.squareup.retrofit2:converter-moshi:$versions.retrofit"
   implementation "com.squareup.retrofit2:adapter-rxjava2:$versions.retrofit"
