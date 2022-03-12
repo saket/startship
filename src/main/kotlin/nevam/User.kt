@@ -18,7 +18,7 @@ data class NexusUser(val username: String, val password: String) {
       )
     }
 
-    const val DEFAULT_USERNAME_PROPERTY: String = "SONATYPE_NEXUS_USERNAME"
-    const val DEFAULT_PASSWORD_PROPERTY: String = "SONATYPE_NEXUS_PASSWORD"
+    const val DEFAULT_USERNAME_PROPERTY: String = "mavenCentralUsername"
+    const val DEFAULT_PASSWORD_PROPERTY: String = "mavenCentralPassword"
   }
 }

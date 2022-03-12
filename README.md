@@ -36,8 +36,8 @@ $ startship release -c com.example:nicolascage,dianekruger:4.2.0
 
 Sonatype account credentials are read from your machine's `~/gradle/gradle.properties`.
 ```properties
-SONATYPE_NEXUS_USERNAME=username
-SONATYPE_NEXUS_PASSWORD=password
+mavenCentralUsername=username
+mavenCentralPassword=password
 ```
 
 You can also provide these using `-u` and `-p` options. The values passed can be either Gradle property keys or your actual username or password values.
