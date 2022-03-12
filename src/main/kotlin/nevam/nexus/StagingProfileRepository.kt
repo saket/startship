@@ -14,6 +14,7 @@ import java.time.Clock
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlin.LazyThreadSafetyMode.NONE
 
 data class StagingRepositoriesResponse(
@@ -95,7 +96,7 @@ fun Collection<StagingProfileRepository>.toTableString(): String {
 }
 
 fun StagingProfileRepository.timestampRelativeToNow(clock: Clock = Clock.systemUTC()): String {
-  val formatter = DateTimeFormatter.ofPattern("eee MMM dd HH:mm:ss 'UTC' yyyy")
+  val formatter = DateTimeFormatter.ofPattern("eee MMM dd HH:mm:ss 'UTC' yyyy", Locale.US)
   val updatedAt = LocalDateTime.parse(updatedAtString, formatter)
   val timeSince = Duration.between(updatedAt, LocalDateTime.now(clock))
 
