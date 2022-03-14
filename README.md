@@ -25,7 +25,7 @@ VERSION_NAME=4.2.0
 
 Alternatively, you can provide them using `-c`.
 ```shell script
-# Single artifact:
+# Single artifact
 $ startship release -c com.example:nicolascage:4.2.0
 
 # Multiple artifacts
