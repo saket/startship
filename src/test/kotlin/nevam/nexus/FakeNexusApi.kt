@@ -1,41 +1,44 @@
 package nevam.nexus
 
-import io.reactivex.Single
-import io.reactivex.subjects.BehaviorSubject
+import app.cash.turbine.Turbine
+import com.slack.eithernet.ApiResult
 import nevam.nexus.network.MavenMetadata
 import nevam.nexus.network.NexusApi
 import nevam.nexus.network.ProfileId
 import nevam.nexus.network.RepositoryActionRequest
 import nevam.nexus.network.RepositoryId
-import retrofit2.Call
 
 class FakeNexusApi : NexusApi {
-  override fun stagingRepositories(): Call<StagingRepositoriesResponse> {
-    TODO()
+  val repository = Turbine<StagingProfileRepository>()
+
+  override fun stagingRepositories(): ApiResult<StagingRepositoriesResponse, Unit> {
+    TODO("Not yet implemented")
   }
 
-  var repository = BehaviorSubject.create<StagingProfileRepository>()
-  override fun stagingRepository(repositoryId: RepositoryId): Single<StagingProfileRepository> {
-    return repository.firstOrError()
+  override suspend fun stagingRepository(repositoryId: RepositoryId): ApiResult<StagingProfileRepository, Unit> {
+    return ApiResult.success(repository.awaitItem())
   }
 
-  override fun stagingMavenMetadata(repositoryId: RepositoryId, repositoryPath: String): Single<MavenMetadata> {
-    TODO()
+  override fun close(profileId: ProfileId, request: RepositoryActionRequest): ApiResult<Unit, Unit> {
+    TODO("Not yet implemented")
   }
 
-  override fun close(profileId: ProfileId, request: RepositoryActionRequest): Call<Void> {
-    TODO()
+  override fun release(profileId: ProfileId, request: RepositoryActionRequest): ApiResult<Unit, Unit> {
+    TODO("Not yet implemented")
   }
 
-  override fun release(profileId: ProfileId, request: RepositoryActionRequest): Call<Void> {
-    TODO()
+  override fun drop(profileId: ProfileId, request: RepositoryActionRequest): ApiResult<Unit, Unit> {
+    TODO("Not yet implemented")
   }
 
-  override fun drop(profileId: ProfileId, request: RepositoryActionRequest): Call<Void> {
-    TODO()
+  override suspend fun releaseMavenMetadata(repositoryPath: String): ApiResult<MavenMetadata, Unit> {
+    TODO("Not yet implemented")
   }
 
-  override fun releaseMavenMetadata(repositoryPath: String): Single<MavenMetadata> {
-    TODO()
+  override suspend fun stagingMavenMetadata(
+    repositoryId: RepositoryId,
+    repositoryPath: String
+  ): ApiResult<MavenMetadata, Unit> {
+    TODO("Not yet implemented")
   }
 }

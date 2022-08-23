@@ -1,6 +1,6 @@
 package nevam.nexus
 
-import java.time.Duration
+import kotlin.time.Duration
 
 sealed class StatusCheckState {
   object Checking : StatusCheckState()

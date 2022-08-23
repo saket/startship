@@ -8,8 +8,10 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.defaultLazy
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
-import io.reactivex.Observable
-import io.reactivex.rxkotlin.blockingSubscribeBy
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.runBlocking
 import nevam.clikt.UserInput
 import nevam.nexus.Nexus
 import nevam.nexus.StagingProfileRepository
@@ -25,27 +27,27 @@ import nevam.nexus.StatusCheckState.RetryingIn
 import nevam.nexus.StatusCheckState.WillRetry
 import nevam.nexus.contentUrl
 import nevam.nexus.toTableString
-import nevam.util.hour
 import nevam.util.stacktraceToString
 import org.jline.terminal.TerminalBuilder.terminal
 import kotlin.system.exitProcess
+import kotlin.time.Duration.Companion.hours
 
 class ReleaseCommand : CliktCommand(name = "release") {
   private val debugMode by option("-d", "--debug", help = "Whether to print debug logs")
-      .flag(default = false)
+    .flag(default = false)
 
   private val coordinates by option("-c", "--coordinates", help = "Library's maven address")
-      .convert { MavenCoordinates.from(it) }
-      .defaultLazy { MavenCoordinates.readFrom("gradle.properties") }
+    .convert { MavenCoordinates.from(it) }
+    .defaultLazy { MavenCoordinates.readFrom("gradle.properties") }
 
   private val username by option(
-      "-u", "--username",
-      help = "The Sonatype Nexus username to use, or a global Gradle property defining it"
+    "-u", "--username",
+    help = "The Sonatype Nexus username to use, or a global Gradle property defining it"
   ).default(NexusUser.DEFAULT_USERNAME_PROPERTY)
 
   private val password by option(
-      "-p", "--password",
-      help = "The Sonatype Nexus password to use, or a global Gradle property defining it"
+    "-p", "--password",
+    help = "The Sonatype Nexus password to use, or a global Gradle property defining it"
   ).default(NexusUser.DEFAULT_PASSWORD_PROPERTY)
 
   private val hostPrefix by option(
@@ -60,10 +62,10 @@ class ReleaseCommand : CliktCommand(name = "release") {
       Pom(MavenCoordinates(pomFromCoordinates.groupId, artifactIds[index], pomFromCoordinates.version))
     }
     AppModule(
-        user = NexusUser.readFrom("~/.gradle/gradle.properties", username, password),
-        debugMode = debugMode,
-        poms = poms,
-        hostPrefix = hostPrefix
+      user = NexusUser.readFrom("~/.gradle/gradle.properties", username, password),
+      debugMode = debugMode,
+      poms = poms,
+      hostPrefix = hostPrefix
     )
   }
 
@@ -71,7 +73,7 @@ class ReleaseCommand : CliktCommand(name = "release") {
   private val nexus: Nexus get() = appModule.nexus
   private val poms: List<Pom> get() = appModule.poms
 
-  override fun run() {
+  override fun run() = runBlocking {
     echo("Preparing to release $coordinates")
     echoNewLine()
     echo("Fetching staged repositories...")
@@ -134,9 +136,9 @@ class ReleaseCommand : CliktCommand(name = "release") {
     }
   }
 
-  private fun validate(repository: StagingProfileRepository) {
+  private suspend fun validate(repository: StagingProfileRepository) {
     poms.forEach { pom ->
-      val isMetadataPresent = nexus.isMetadataPresent(repository, pom).blockingGet()
+      val isMetadataPresent = nexus.isMetadataPresent(repository, pom)
       if (!isMetadataPresent) {
         echoNewLine()
         echo("Error: ${repository.id}'s maven coordinates don't match ${pom.coordinates}.")
@@ -146,7 +148,7 @@ class ReleaseCommand : CliktCommand(name = "release") {
     }
   }
 
-  private fun close(repository: StagingProfileRepository) {
+  private suspend fun close(repository: StagingProfileRepository) {
     input.confirm("Close repository ${repository.id}?", default = true, abort = true)
     echoNewLine()
     echo("Requesting Nexus to mark ${repository.id} as closed... ", trailingNewline = false)
@@ -157,32 +159,35 @@ class ReleaseCommand : CliktCommand(name = "release") {
     waitTillClosed(repository).echoStreamingProgress()
   }
 
-  private fun waitTillClosed(repository: StagingProfileRepository): Observable<String> {
+  private fun waitTillClosed(repository: StagingProfileRepository): Flow<String> {
     return nexus.pollUntilClosed(repository.id)
-        .doAfterNext { if (it is GaveUp) exitProcess(1) }
-        .map {
-          when (it) {
-            is Checking -> "Talking to Nexus..."
-            is WillRetry -> "Nope, not done yet"
-            is RetryingIn -> "Checking again in ${it.secondsRemaining}s..."
-            is Done -> "Closed!"
-            is GaveUp -> {
-              val emptyLineForCoveringLastEcho = Array(100) { " " }.joinToString(separator = "")
-              """
+      .transform {
+        emit(it)
+        if (it is GaveUp) exitProcess(1)
+      }
+      .map {
+        when (it) {
+          is Checking -> "Talking to Nexus..."
+          is WillRetry -> "Nope, not done yet"
+          is RetryingIn -> "Checking again in ${it.secondsRemaining}s..."
+          is Done -> "Closed!"
+          is GaveUp -> {
+            val emptyLineForCoveringLastEcho = " ".repeat(100)
+            """
               |$emptyLineForCoveringLastEcho
-              |Gave up after trying for ${it.after.toMinutes()} minutes. It usually doesn't take this long, and is 
+              |Gave up after trying for ${it.after.inWholeMinutes} minutes. It usually doesn't take this long, and is 
               |probably an indication that Nexus is unavailable. Try again after some time?
               """.trimMargin()
-            }
           }
         }
+      }
   }
 
-  private fun release(repository: StagingProfileRepository) {
+  private suspend fun release(repository: StagingProfileRepository) {
     val pom = poms[0]
     val contentUrl = appModule.nexusModule.contentUrl(repository, pom)
     echo(
-        """
+      """
           |The contents of ${pom.groupId} ${pom.version} (${repository.id}) can be verified here before it's released: 
           |$contentUrl
         """.trimMargin()
@@ -199,48 +204,53 @@ class ReleaseCommand : CliktCommand(name = "release") {
     waitTillAvailable().echoStreamingProgress()
   }
 
-  private fun waitTillAvailable(): Observable<String> {
+  private fun waitTillAvailable(): Flow<String> {
     val pom = poms[0]
     return nexus.pollUntilSyncedToMavenCentral(pom)
-        .doAfterNext { if (it is GaveUp) exitProcess(1) }
-        .map {
-          when (it) {
-            is Checking -> "Talking to Maven Central..."
-            is WillRetry -> "Nope, not done yet"
-            is RetryingIn -> "Checking again in ${it.secondsRemaining}s..."
-            is Done -> "Available now. Go ahead and announce ${pom.artifactId}:${pom.version} to public!"
-            is GaveUp -> {
-              val emptyLineForCoveringLastEcho = Array(terminalWidth()) { " " }.joinToString(separator = "")
-              val timeSpent = when {
-                it.after >= 1.hour -> "${it.after.toHours()} hours"
-                else -> "${it.after.toMinutes()} minutes"
-              }
-              """
+      .transform {
+        emit(it)
+        if (it is GaveUp) exitProcess(1)
+      }
+      .map {
+        when (it) {
+          is Checking -> "Talking to Maven Central..."
+          is WillRetry -> "Nope, not done yet"
+          is RetryingIn -> "Checking again in ${it.secondsRemaining}s..."
+          is Done -> "Available now. Go ahead and announce ${pom.artifactId}:${pom.version} to public!"
+          is GaveUp -> {
+            val emptyLineForCoveringLastEcho = Array(terminalWidth()) { " " }.joinToString(separator = "")
+            val timeSpent = when {
+              it.after >= 1.hours -> "${it.after.inWholeHours} hours"
+              else -> "${it.after.inWholeMinutes} minutes"
+            }
+            """
               |$emptyLineForCoveringLastEcho
               |Gave up after trying for $timeSpent. It usually doesn't take this long, and is 
               |probably an indication that Nexus is having issues today. Try again after some time?
               """.trimMargin()
-            }
           }
         }
+      }
   }
 
-  private fun Observable<String>.echoStreamingProgress() {
-    blockingSubscribeBy(
-        onError = {
-          echoNewLine()
-          echo("Error: ${it.message}", err = true)
-          if (debugMode) {
-            echo(it.stacktraceToString())
-          }
-          exitProcess(1)
-        },
-        onNext = {
-          // The line should be long enough to cover all characters of the last line.
-          echo("\r${it.padEnd(terminalWidth(), padChar = ' ')}", trailingNewline = false)
-        },
-        onComplete = { echoNewLine(); echoNewLine() }
-    )
+  private suspend fun Flow<String>.echoStreamingProgress() {
+    try {
+      collect {
+        // The line should be long enough to cover all characters of the last line.
+        echo("\r${it.padEnd(terminalWidth(), padChar = ' ')}", trailingNewline = false)
+      }
+
+    } catch (e: Throwable) {
+      echoNewLine()
+      echo("Error: ${e.message}", err = true)
+      if (debugMode) {
+        echo(e.stacktraceToString())
+      }
+      exitProcess(1)
+    }
+
+    echoNewLine()
+    echoNewLine()
   }
 
   private fun drop(repository: StagingProfileRepository) {
