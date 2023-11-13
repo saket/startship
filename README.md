@@ -1,3 +1,6 @@
+# ⚠️ Deprecated
+Deprecated in favor of [gradle-maven-publish-plugin](https://vanniktech.github.io/gradle-maven-publish-plugin/central/#publishing-releases)'s `automaticRelease` property in combination with [dependency-watch](https://github.com/JakeWharton/dependency-watch).
+
 # startship
 
 ![demo](demo.gif)
